@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage x:Class="ExcelClone.MainPage"
+             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             Title="Excel Clone">
+    
+    <Grid RowDefinitions="Auto,Auto,Auto,*" 
+          ColumnDefinitions="*"
+          Padding="15"
+          RowSpacing="15">
+        
+        <!-- Input Section -->
+        <Frame Grid.Row="0" BackgroundColor="#f5f5f5" Padding="15">
+            <VerticalStackLayout Spacing="10">
+                <Label Text="Enter grid dimensions:" FontSize="16" FontAttributes="Bold"/>
+                <Grid ColumnDefinitions="Auto,*,Auto,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+                    <Label Text="Columns:" Grid.Row="0" Grid.Column="0" VerticalOptions="Center"/>
+                    <Entry x:Name="ColumnsEntry" Grid.Row="0" Grid.Column="1" Text="10"/>
+                    <Label Text="Rows:" Grid.Row="0" Grid.Column="2" VerticalOptions="Center"/>
+                    <Entry x:Name="RowsEntry" Grid.Row="0" Grid.Column="3" Text="20"/>
+                    <Button x:Name="GenerateButton" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4"
+                            Text="Generate Grid" Clicked="OnGenerateClicked"
+                            BackgroundColor="#217346" TextColor="White"/>
+                </Grid>
+            </VerticalStackLayout>
+        </Frame>
+
+        <!-- Excel-like Formula Bar -->
+        <Frame Grid.Row="1" BackgroundColor="#f8f9fa" Padding="10" IsVisible="False" x:Name="FormulaBarContainer">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                <Label Text="fx" Grid.Column="0" FontAttributes="Bold" TextColor="#666" VerticalOptions="Center"/>
+                <Grid ColumnDefinitions="Auto,*" Grid.Column="1">
+                    <Border BackgroundColor="#e8eaed" Padding="8,5" WidthRequest="60">
+                        <Label x:Name="ActiveCellLabel" Text="A1" FontSize="12" VerticalOptions="Center"/>
+                    </Border>
+                    <Entry x:Name="FormulaEntry" Grid.Column="1" 
+                           Placeholder="Enter value or formula (e.g., =A1+B1)"
+                           Completed="OnFormulaEntryCompleted"
+                           Unfocused="OnFormulaEntryUnfocused"/>
+                </Grid>
+            </Grid>
+        </Frame>
+        
+        <Label x:Name="StatusLabel" Grid.Row="2" Text="" FontSize="14" HorizontalOptions="Center"/>
+        
+        <!-- Grid Container -->
+        <Border x:Name="GridContainer" Grid.Row="3" IsVisible="False"
+                BackgroundColor="White" Stroke="#cccccc" StrokeThickness="1"
+                Margin="0,0,0,20">
+            
+            <Grid RowDefinitions="Auto,*" ColumnDefinitions="Auto,*">
+                
+                <!-- Corner -->
+                <Border x:Name="CornerCell" Grid.Row="0" Grid.Column="0"
+                        BackgroundColor="#217346" Stroke="#cccccc" StrokeThickness="1"
+                        WidthRequest="40" HeightRequest="25"/>
+                
+                <!-- Column Headers -->
+                <ScrollView x:Name="ColumnHeadersScroll" Grid.Row="0" Grid.Column="1"
+                            Orientation="Horizontal" Scrolled="OnColumnHeadersScrolled">
+                    <StackLayout x:Name="ColumnHeadersLayout" Orientation="Horizontal"/>
+                </ScrollView>
+                
+                <!-- Row Headers -->
+                <ScrollView x:Name="RowHeadersScroll" Grid.Row="1" Grid.Column="0"
+                            Orientation="Vertical" Scrolled="OnRowHeadersScrolled">
+                    <StackLayout x:Name="RowHeadersLayout" Orientation="Vertical"/>
+                </ScrollView>
+                
+                <!-- Data Grid -->
+                <ScrollView x:Name="DataGridScroll" Grid.Row="1" Grid.Column="1"
+                            Orientation="Both" Scrolled="OnDataGridScrolled">
+                    <AbsoluteLayout x:Name="DataGridLayout"/>
+                </ScrollView>
+                
+            </Grid>
+        </Border>
+        
+    </Grid>
+</ContentPage>

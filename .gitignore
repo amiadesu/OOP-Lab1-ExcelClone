@@ -1,0 +1,8 @@
+bin/
+obj/
+
+Platforms/**
+!Platforms/Windows/
+
+ExcelClone.sln
+ExcelClone.csproj.user

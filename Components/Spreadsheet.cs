@@ -1,0 +1,101 @@
+using System.Collections.Generic;
+using System.Linq;
+using ExcelClone.Services;
+using ExcelClone.Constants;
+
+namespace ExcelClone.Components
+{
+    public class Spreadsheet
+    {
+        private Dictionary<string, ExcelCell> _cells;
+        private readonly IFormulaParserService _formulaParser;
+        public readonly ICellNameService cellNameService;
+        public int Columns { get; private set; }
+        public int Rows { get; private set; }
+
+        public Spreadsheet(int columns, int rows, IFormulaParserService formulaParser, ICellNameService cellNameService)
+        {
+            this.cellNameService = cellNameService;
+            Columns = columns;
+            Rows = rows;
+            _formulaParser = formulaParser;
+            _cells = new Dictionary<string, ExcelCell>();
+            InitializeCells();
+        }
+
+        private void InitializeCells()
+        {
+            for (int row = 0; row < Rows; row++)
+            {
+                for (int col = 0; col < Columns; col++)
+                {
+                    string cellName = cellNameService.GetCellName(col, row);
+                    _cells[cellName] = new ExcelCell(cellName);
+                }
+            }
+        }
+
+        public ExcelCell GetCell(string cellName)
+        {
+            return _cells.ContainsKey(cellName.ToUpper()) ? _cells[cellName.ToUpper()] : null;
+        }
+
+        public void SetCellValue(string cellName, string value)
+        {
+            if (!_cells.ContainsKey(cellName.ToUpper()))
+                return;
+
+            var cell = _cells[cellName.ToUpper()];
+            
+            if (value.StartsWith(Literals.prefix))
+            {
+                cell.Formula = value;
+                cell.RealValue = value;
+                cell.DisplayedValue = _formulaParser.Evaluate(value, cellName, this);
+            }
+            else
+            {
+                cell.Formula = "";
+                cell.RealValue = value;
+                cell.DisplayedValue = value;
+            }
+
+            // Recalculate cells
+            RecalculateCells();
+        }
+
+        public string GetCellDisplayValue(string cellName)
+        {
+            var cell = GetCell(cellName);
+            return cell?.DisplayedValue ?? "#REF!";
+        }
+
+        public string GetCellRealValue(string cellName)
+        {
+            var cell = GetCell(cellName);
+            return cell?.RealValue ?? "";
+        }
+
+        private void RecalculateCells()
+        {
+            // Recalculate all formula cells
+            foreach (var cell in _cells.Values)
+            {
+                if (!string.IsNullOrEmpty(cell.Formula))
+                {
+                    cell.DisplayedValue = _formulaParser.Evaluate(cell.Formula, cell.Name, this);
+                }
+            }
+        }
+
+        public List<ExcelCell> GetAllCells()
+        {
+            return _cells.Values.ToList();
+        }
+
+        public bool CellExists(string cellName)
+        {
+            return _cells.ContainsKey(cellName.ToUpper());
+        }
+    }
+}
