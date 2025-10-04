@@ -1,6 +1,5 @@
 using System;
 using ExcelClone.Constants;
-using ExcelClone.Evaluators.Automatons;
 using ExcelClone.Utils;
 
 namespace ExcelClone.Values;
@@ -59,7 +58,7 @@ public class CellValue : IComparable<CellValue>
         return new CellValue(CellValueType.Boolean, numberValue: value ? 1 : 0);
     }
 
-    // === Comparisons ===
+    // Comparisons
     public static bool operator >(CellValue a, CellValue b) => a.CompareTo(b) > 0;
     public static bool operator <(CellValue a, CellValue b) => a.CompareTo(b) < 0;
     public static bool operator >=(CellValue a, CellValue b) => a.CompareTo(b) >= 0;
@@ -81,32 +80,31 @@ public class CellValue : IComparable<CellValue>
         return !DoubleChecker.Equal(a.NumberValue, b);
     }
 
-    // Bitwise AND → used by &&
+    // Bitwise and logical AND and OR
     public static CellValue operator &(CellValue a, CellValue b)
     {
-        return new CellValue(CellValueType.Boolean,
-            numberValue: ((bool)a && (bool)b) ? 1 : 0);
+        return new CellValue(
+            CellValueType.Boolean,
+            numberValue: ((bool)a && (bool)b) ? 1 : 0
+        );
     }
-
-    // Bitwise OR → used by ||
     public static CellValue operator |(CellValue a, CellValue b)
     {
-        return new CellValue(CellValueType.Boolean,
-            numberValue: ((bool)a || (bool)b) ? 1 : 0);
+        return new CellValue(
+            CellValueType.Boolean,
+            numberValue: ((bool)a || (bool)b) ? 1 : 0
+        );
     }
-
-    // Required for short-circuiting with && and ||
     public static bool operator true(CellValue a) => (bool)a;
     public static bool operator false(CellValue a) => !(bool)a;
 
-    // === Arithmetic operators (only valid for numbers) ===
+    // Arithmetic operators (only valid for numbers)
     public static CellValue operator +(CellValue a, CellValue b)
     {
         if (a.Type == CellValueType.Number && b.Type == CellValueType.Number)
             return new CellValue(CellValueType.Number, numberValue: a.NumberValue + b.NumberValue);
         throw new InvalidOperationException("Operator + is only valid for numbers");
     }
-
     public static CellValue operator +(CellValue cell)
     {
         if (cell.Type == CellValueType.Number)
@@ -114,14 +112,12 @@ public class CellValue : IComparable<CellValue>
 
         throw new InvalidOperationException("Unary plus is only valid for numbers");
     }
-
     public static CellValue operator -(CellValue a, CellValue b)
     {
         if (a.Type == CellValueType.Number && b.Type == CellValueType.Number)
             return new CellValue(CellValueType.Number, numberValue: a.NumberValue - b.NumberValue);
         throw new InvalidOperationException("Operator - is only valid for numbers");
     }
-
     public static CellValue operator -(CellValue cell)
     {
         if (cell.Type == CellValueType.Number)
@@ -129,14 +125,12 @@ public class CellValue : IComparable<CellValue>
 
         throw new InvalidOperationException("Unary minus is only valid for numbers");
     }
-
     public static CellValue operator *(CellValue a, CellValue b)
     {
         if (a.Type == CellValueType.Number && b.Type == CellValueType.Number)
             return new CellValue(CellValueType.Number, numberValue: a.NumberValue * b.NumberValue);
         throw new InvalidOperationException("Operator * is only valid for numbers");
     }
-
     public static CellValue operator /(CellValue a, CellValue b)
     {
         if (a.Type == CellValueType.Number && b.Type == CellValueType.Number)
@@ -147,7 +141,6 @@ public class CellValue : IComparable<CellValue>
         }
         throw new InvalidOperationException("Operator / is only valid for numbers");
     }
-
     public static CellValue operator %(CellValue a, CellValue b)
     {
         if (a.Type == CellValueType.Number && b.Type == CellValueType.Number)
@@ -155,15 +148,13 @@ public class CellValue : IComparable<CellValue>
         throw new InvalidOperationException("Operator % is only valid for numbers");
     }
 
-    // === Conversion operators ===
+    // Conversion operators
     public static implicit operator string(CellValue cell) => cell.ToString();
-
     public static explicit operator double(CellValue cell)
     {
         if (cell.Type == CellValueType.Number) return cell.NumberValue;
         throw new InvalidCastException($"Cannot convert {cell.Type} to double");
     }
-
     public static explicit operator bool(CellValue cell)
     {
         return cell.Type switch
@@ -175,7 +166,7 @@ public class CellValue : IComparable<CellValue>
         };
     }
 
-    // === IComparable implementation ===
+    // IComparable implementation
     public int CompareTo(CellValue? other)
     {
         if (other is null) return 1;
@@ -194,7 +185,7 @@ public class CellValue : IComparable<CellValue>
         return Type.CompareTo(other.Type);
     }
 
-    // === Overrides ===
+    // Other overrides
     public override string ToString()
     {
         return Type switch
@@ -218,6 +209,7 @@ public class CellValue : IComparable<CellValue>
         return HashCode.Combine(Type, NumberValue, Value);
     }
 
+    // Custom methods
     public bool Equivalent(CellValue other)
     {
         return this.Value == other.Value || DoubleChecker.Equal(this.NumberValue, other.NumberValue);
