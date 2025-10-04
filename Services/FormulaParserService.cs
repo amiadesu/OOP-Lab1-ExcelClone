@@ -89,7 +89,7 @@ public class FormulaParserService : IFormulaParserService
         try
         {
             double result = FormulaEvaluator.Evaluate(tokens);
-            return DataFormatter.FormatFloatingPoint(result);
+            return DataProcessor.FormatFloatingPoint(result);
         }
         catch (Exception e)
         {

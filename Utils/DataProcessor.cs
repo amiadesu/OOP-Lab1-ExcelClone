@@ -3,7 +3,7 @@ using ExcelClone.Constants;
 
 namespace ExcelClone.Utils;
 
-public static class DataFormatter
+public static class DataProcessor
 {
     public static string FormatFloatingPoint(double number)
     {
