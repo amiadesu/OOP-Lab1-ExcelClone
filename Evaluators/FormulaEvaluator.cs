@@ -195,37 +195,10 @@ namespace ExcelClone.Evaluators
 
             private static double EvaluatePrefixFunction(string name, double[] args)
             {
-                switch (name)
-                {
-                    case "SUM":
-                        return args.Sum();
-                    case "MAX":
-                        if (args.Length != 2)
-                            throw new Exception($"Function {name} expects exactly 2 arguments");
-                        return args.Max();
-                    case "MIN":
-                        if (args.Length != 2)
-                            throw new Exception($"Function {name} expects exactly 2 arguments");
-                        return args.Min();
-                    case "MMAX":
-                        return args.Max();
-                    case "MMIN":
-                        return args.Min();
-                    case "INC":
-                        if (args.Length != 1)
-                            throw new Exception($"Function {name} expects exactly 1 argument");
-                        return args[0] + 1;
-                    case "DEC":
-                        if (args.Length != 1)
-                            throw new Exception($"Function {name} expects exactly 1 argument");
-                        return args[0] - 1;
-                    case "NOT":
-                        if (args.Length != 1)
-                            throw new Exception($"Function {name} expects exactly 1 argument");
-                        return DoubleChecker.Equal(args[0], 0) ? 1 : 0;
-                    default:
-                        throw new Exception($"Unknown prefix function '{name}'");
-                }
+                if (Functions.prefixFunctions.TryGetValue(name, out var func))
+                    return func(args);
+
+                throw new Exception($"Unknown prefix function '{name}'");
             }
         }
     }

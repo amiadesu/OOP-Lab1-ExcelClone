@@ -35,55 +35,64 @@ public static class Functions
         "MIN", "MAX", "MMIN", "MMAX", "INC", "DEC", "NOT"
     ];
 
-    public static readonly HashSet<string> rightAssociativeFunctions = new HashSet<string>
-    {
-        "^"
-    };
-
     public static readonly Dictionary<string, (int precedence, Associativity associativity)> infixFunctionsInfo =
-    new(StringComparer.OrdinalIgnoreCase)
-    {
-        { "^", (16, Associativity.Right) },
-        { "*", (15, Associativity.Left) },
-        { "/", (15, Associativity.Left) },
-        { "+", (14, Associativity.Left) },
-        { "-", (14, Associativity.Left) },
+        new(StringComparer.OrdinalIgnoreCase)
+        {
+            { "^", (16, Associativity.Right) },
+            { "*", (15, Associativity.Left) },
+            { "/", (15, Associativity.Left) },
+            { "+", (14, Associativity.Left) },
+            { "-", (14, Associativity.Left) },
 
-        { "MOD", (14, Associativity.Left) },
-        { "DIV", (14, Associativity.Left) },
+            { "MOD", (14, Associativity.Left) },
+            { "DIV", (14, Associativity.Left) },
 
-        { "<", (13, Associativity.Left) },
-        { ">", (13, Associativity.Left) },
-        { "<=", (13, Associativity.Left) },
-        { ">=", (13, Associativity.Left) },
-        { "=", (13, Associativity.Left) },
-        { "<>", (12, Associativity.Left) },
+            { "<", (13, Associativity.Left) },
+            { ">", (13, Associativity.Left) },
+            { "<=", (13, Associativity.Left) },
+            { ">=", (13, Associativity.Left) },
+            { "=", (13, Associativity.Left) },
+            { "<>", (12, Associativity.Left) },
 
-        { "AND", (11, Associativity.Left) },
-        { "OR", (10, Associativity.Left) },
-        { "EQV", (9, Associativity.Left) },
-    };
+            { "AND", (11, Associativity.Left) },
+            { "OR", (10, Associativity.Left) },
+            { "EQV", (9, Associativity.Left) },
+        };
 
-    public static readonly Dictionary<string, Func<double, double, double>> operatorFunctions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ["^"] = (l, r) => Math.Pow(l, r),
-        ["*"] = (l, r) => l * r,
-        ["/"] = (l, r) => l / r,
-        ["+"] = (l, r) => l + r,
-        ["-"] = (l, r) => l - r,
-        
-        ["MOD"] = (l, r) => l % r,
-        ["DIV"] = (l, r) => (int)(l / r),
+    public static readonly Dictionary<string, Func<double, double, double>> operatorFunctions =
+        new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["^"] = CellFunctions.PowerOperator,
+            ["*"] = CellFunctions.MultiplicationOperator,
+            ["/"] = CellFunctions.DivisionOperator,
+            ["+"] = CellFunctions.AdditionOperator,
+            ["-"] = CellFunctions.SubstractionOperator,
 
-        ["<"] = (l, r) => l < r ? 1 : 0,
-        ["<="] = (l, r) => l <= r ? 1 : 0,
-        [">"] = (l, r) => l > r ? 1 : 0,
-        [">="] = (l, r) => l >= r ? 1 : 0,
-        ["="] = (l, r) => DoubleChecker.Equal(l, r) ? 1 : 0,
-        ["<>"] = (l, r) => DoubleChecker.Equal(l, r) ? 0 : 1,
+            ["MOD"] = CellFunctions.ModOperator,
+            ["DIV"] = CellFunctions.DivOperator,
 
-        ["AND"] = (l, r) => DoubleChecker.Equal(l, 1) && DoubleChecker.Equal(r, 1) ? 1 : 0,
-        ["OR"] = (l, r) => DoubleChecker.Equal(l, 1) || DoubleChecker.Equal(r, 1) ? 1 : 0,
-        ["EQV"] = (l, r) => DoubleChecker.Equal(l, 0) == DoubleChecker.Equal(r, 0) ? 1 : 0,
-    };
+            ["<"] = CellFunctions.LessThanOperator,
+            ["<="] = CellFunctions.LessOrEqualOperator,
+            [">"] = CellFunctions.GreaterThanOperator,
+            [">="] = CellFunctions.GreaterOrEqualOperator,
+            ["="] = CellFunctions.EqualOperator,
+            ["<>"] = CellFunctions.NotEqualOperator,
+
+            ["AND"] = CellFunctions.AndOperator,
+            ["OR"] = CellFunctions.OrOperator,
+            ["EQV"] = CellFunctions.LogicalEquivalentOperator,
+        };
+
+    public static readonly Dictionary<string, Func<double[], double>> prefixFunctions =
+        new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["SUM"]  = CellFunctions.SumFunction,
+            ["MIN"]  = CellFunctions.MinFunction,
+            ["MAX"]  = CellFunctions.MaxFunction,
+            ["MMIN"] = CellFunctions.MminFunction,
+            ["MMAX"] = CellFunctions.MmaxFunction,
+            ["INC"]  = CellFunctions.IncrementFunction,
+            ["DEC"]  = CellFunctions.DecrementFunction,
+            ["NOT"]  = CellFunctions.NotFunction,
+        };
 }
