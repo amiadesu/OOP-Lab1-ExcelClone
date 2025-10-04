@@ -3,15 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using ExcelClone.Evaluators.Tokens;
 using ExcelClone.Constants;
+using ExcelClone.Values;
+using ExcelClone.Utils;
 
 namespace ExcelClone.Evaluators
 {
     public static class FormulaEvaluator
     {
-        public static double Evaluate(List<Token> tokens)
+        public static CellValue Evaluate(List<Token> tokens)
         {
             var parser = new Parser(tokens);
-            double result = parser.ParseExpression();
+            CellValue result = parser.ParseExpression();
 
             if (!parser.IsAtEnd())
                 throw new Exception($"Unexpected token '{parser.Current?.Value}' at the end of expression");
@@ -53,14 +55,14 @@ namespace ExcelClone.Evaluators
             }
 
             // Entry point
-            public double ParseExpression() => ParseBinaryExpression(0);
+            public CellValue ParseExpression() => ParseBinaryExpression(0);
 
             /// <summary>
             /// https://en.wikipedia.org/wiki/Operator-precedence_parser
             /// </summary>
-            private double ParseBinaryExpression(int minPrecedence)
+            private CellValue ParseBinaryExpression(int minPrecedence)
             {
-                double left = ParseUnary();
+                CellValue left = ParseUnary();
 
                 while (!IsAtEnd())
                 {
@@ -72,7 +74,7 @@ namespace ExcelClone.Evaluators
                     // Choose nextMinPrec depending on associativity
                     int nextMinPrec = (assoc == Associativity.Left) ? prec + 1 : prec;
 
-                    double right = ParseBinaryExpression(nextMinPrec);
+                    CellValue right = ParseBinaryExpression(nextMinPrec);
 
                     left = EvaluateOperatorOrFunction(op, left, right);
                 }
@@ -112,7 +114,7 @@ namespace ExcelClone.Evaluators
                 return Current?.Type == TokenType.Operator && (op == "<" || op == ">");
             }
 
-            private static double EvaluateOperatorOrFunction(string op, double left, double right)
+            private static CellValue EvaluateOperatorOrFunction(string op, CellValue left, CellValue right)
             {
                 if (Functions.operatorFunctions.TryGetValue(op, out var func))
                     return func(left, right);
@@ -121,7 +123,7 @@ namespace ExcelClone.Evaluators
             }
 
             // Unary +/-
-            private double ParseUnary()
+            private CellValue ParseUnary()
             {
                 if (!IsAtEnd() && Current!.Type == TokenType.Operator)
                 {
@@ -133,7 +135,7 @@ namespace ExcelClone.Evaluators
             }
 
             // Primary: number, parentheses, prefix function
-            private double ParsePrimary()
+            private CellValue ParsePrimary()
             {
                 if (IsAtEnd()) throw new Exception("Unexpected end of expression");
                 Token token = Current!;
@@ -142,14 +144,23 @@ namespace ExcelClone.Evaluators
                 if (token.Type == TokenType.Number)
                 {
                     Next();
-                    return double.Parse(token.Value, System.Globalization.CultureInfo.InvariantCulture);
+                    return new CellValue(
+                        CellValueType.Number,
+                        numberValue: DataProcessor.StringToDouble(token.Value)
+                    );
+                }
+
+                if (token.Type == TokenType.CellValue)
+                {
+                    Next();
+                    return token.CellValue;
                 }
 
                 // Parentheses
                 if (token.Type == TokenType.Parenthesis && token.Value == "(")
                 {
                     Next();
-                    double value = ParseExpression();
+                    CellValue value = ParseExpression();
                     Consume(TokenType.Parenthesis, ")");
                     return value;
                 }
@@ -166,10 +177,10 @@ namespace ExcelClone.Evaluators
             }
 
             // Prefix function parser: e.g., SUM(1,2)
-            private double ParsePrefixFunction(string name)
+            private CellValue ParsePrefixFunction(string name)
             {
                 Consume(TokenType.Parenthesis, "(");
-                var args = new List<double>();
+                var args = new List<CellValue>();
 
                 if (!Match(TokenType.Parenthesis, ")"))
                 {
@@ -184,7 +195,7 @@ namespace ExcelClone.Evaluators
                 return EvaluatePrefixFunction(name, args.ToArray());
             }
 
-            private static double EvaluatePrefixFunction(string name, double[] args)
+            private static CellValue EvaluatePrefixFunction(string name, CellValue[] args)
             {
                 if (Functions.prefixFunctions.TryGetValue(name, out var func))
                     return func(args);

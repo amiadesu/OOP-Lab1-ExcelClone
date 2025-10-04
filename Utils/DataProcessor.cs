@@ -5,6 +5,11 @@ namespace ExcelClone.Utils;
 
 public static class DataProcessor
 {
+    public static double StringToDouble(string number)
+    {
+        return double.Parse(number, CultureInfo.InvariantCulture);
+    }
+
     public static string FormatFloatingPoint(double number)
     {
         // If it's an integer, return as integer

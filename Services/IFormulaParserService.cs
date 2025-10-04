@@ -1,9 +1,10 @@
 using ExcelClone.Components;
+using ExcelClone.Values;
 
 namespace ExcelClone.Services
 {
     public interface IFormulaParserService
     {
-        string Evaluate(string formula, string currentCell, Spreadsheet spreadsheet);
+        CellValue Evaluate(string formula, string currentCell, Spreadsheet spreadsheet);
     }
 }

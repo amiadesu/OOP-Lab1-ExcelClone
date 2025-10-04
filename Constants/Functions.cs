@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using ExcelClone.Utils;
+using ExcelClone.Values;
 
 namespace ExcelClone.Constants;
 
@@ -59,7 +60,7 @@ public static class Functions
             { "EQV", (9, Associativity.Left) },
         };
 
-    public static readonly Dictionary<string, Func<double, double, double>> operatorFunctions =
+    public static readonly Dictionary<string, Func<CellValue, CellValue, CellValue>> operatorFunctions =
         new(StringComparer.OrdinalIgnoreCase)
         {
             ["^"] = CellFunctions.PowerOperator,
@@ -83,7 +84,7 @@ public static class Functions
             ["EQV"] = CellFunctions.LogicalEquivalentOperator,
         };
 
-    public static readonly Dictionary<string, Func<double[], double>> prefixFunctions =
+    public static readonly Dictionary<string, Func<CellValue[], CellValue>> prefixFunctions =
         new(StringComparer.OrdinalIgnoreCase)
         {
             ["SUM"]  = CellFunctions.SumFunction,
