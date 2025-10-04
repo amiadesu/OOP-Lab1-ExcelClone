@@ -247,8 +247,7 @@ public class CellValue : IComparable<CellValue>
         }
         else
         {
-            NumberAutomaton numberAutomaton = new NumberAutomaton();
-            if (numberAutomaton.TestString(Value))
+            if (StringChecker.IsSignedNumber(Value))
             {
                 NumberValue = DataProcessor.StringToDouble(Value);
                 Type = CellValueType.Number;

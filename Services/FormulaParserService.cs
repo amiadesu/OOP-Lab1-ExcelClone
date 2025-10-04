@@ -58,12 +58,7 @@ public class FormulaParserService : IFormulaParserService
                     {
                         return Literals.refErrorMessage;
                     }
-                    string cellValue = realCellValue.Value;
-                    if (cellValue.StartsWith('-') || cellValue.StartsWith('+'))
-                    {
-                        cellValue = cellValue[1..];
-                    }
-                    if (_numberAutomaton.TestString(cellValue))
+                    if (StringChecker.IsSignedNumber(realCellValue.Value))
                     {
                         tokens[idx] = new Token
                         {
@@ -72,7 +67,7 @@ public class FormulaParserService : IFormulaParserService
                             Position = token.Position
                         };
                     }
-                    else if (StringChecker.IsError(cellValue))
+                    else if (StringChecker.IsError(realCellValue.Value))
                     {
                         return Literals.errorMessage;
                     }
