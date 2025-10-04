@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ExcelClone.Evaluators.Tokens;
-using ExcelClone.Utils;
 using ExcelClone.Constants;
 
 namespace ExcelClone.Evaluators
@@ -53,14 +52,12 @@ namespace ExcelClone.Evaluators
                 return _tokens[_pos - 1];
             }
 
-            // -------------------
             // Entry point
-            // -------------------
             public double ParseExpression() => ParseBinaryExpression(0);
 
-            // -------------------
-            // Binary expression parser (handles operators & infix functions)
-            // -------------------
+            /// <summary>
+            /// https://en.wikipedia.org/wiki/Operator-precedence_parser
+            /// </summary>
             private double ParseBinaryExpression(int minPrecedence)
             {
                 double left = ParseUnary();
@@ -123,9 +120,7 @@ namespace ExcelClone.Evaluators
                 throw new Exception($"Unknown operator or infix function '{op}'");
             }
 
-            // -------------------
             // Unary +/-
-            // -------------------
             private double ParseUnary()
             {
                 if (!IsAtEnd() && Current!.Type == TokenType.Operator)
@@ -137,9 +132,7 @@ namespace ExcelClone.Evaluators
                 return ParsePrimary();
             }
 
-            // -------------------
             // Primary: number, parentheses, prefix function
-            // -------------------
             private double ParsePrimary()
             {
                 if (IsAtEnd()) throw new Exception("Unexpected end of expression");
@@ -172,9 +165,7 @@ namespace ExcelClone.Evaluators
                 throw new Exception($"Unexpected token '{token.Value}'");
             }
 
-            // -------------------
             // Prefix function parser: e.g., SUM(1,2)
-            // -------------------
             private double ParsePrefixFunction(string name)
             {
                 Consume(TokenType.Parenthesis, "(");
