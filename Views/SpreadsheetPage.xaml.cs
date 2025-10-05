@@ -53,6 +53,11 @@ public partial class SpreadsheetPage : ContentPage {
         await GenerateExcelGridAsync();
     }
 
+    private async void OnHomeClicked(object sender, EventArgs e)
+    {
+        await Shell.Current.Navigation.PushAsync(new StartingPage());
+    }
+
     private async void OnSaveClicked(object sender, EventArgs e)
     {
         string result = await FileSaveService.Save(_spreadsheet, _fileName);

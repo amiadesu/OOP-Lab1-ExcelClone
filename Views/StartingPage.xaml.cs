@@ -16,7 +16,7 @@ public partial class StartingPage : ContentPage {
     
     private async void OnOpenSpreadsheetClicked(object sender, EventArgs e)
     {
-        await Shell.Current.GoToAsync(nameof(SpreadsheetPage));
+        await Shell.Current.Navigation.PushAsync(new SpreadsheetPage());
     }
 
     private async void OnOpenFilesClicked(object sender, EventArgs e)
@@ -24,7 +24,7 @@ public partial class StartingPage : ContentPage {
         var result = await FilePickService.PickTable("Pick table");
         if (result is not null)
         {
-            await Shell.Current.Navigation.PushModalAsync(new SpreadsheetPage(result.FullPath, result.FileName));
+            await Shell.Current.Navigation.PushAsync(new SpreadsheetPage(result.FullPath, result.FileName));
         }
     }
 }
