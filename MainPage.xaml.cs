@@ -149,7 +149,7 @@ namespace ExcelClone
                     // Create UI control
                     var cellControl = new Label
                     {
-                        Text = excelCell.DisplayedValue,
+                        Text = excelCell.Value.ToString(),
                         WidthRequest = CELL_WIDTH,
                         HeightRequest = CELL_HEIGHT,
                         FontSize = 10,
@@ -195,7 +195,7 @@ namespace ExcelClone
             
             // Update formula bar
             ActiveCellLabel.Text = cellAddress;
-            FormulaEntry.Text = _activeCell.RealValue;
+            FormulaEntry.Text = _activeCell.Formula;
             FormulaEntry.Focus();
         }
 
@@ -233,14 +233,14 @@ namespace ExcelClone
                 if (_cellControls.ContainsKey(cell.Name))
                 {
                     var cellControl = _cellControls[cell.Name];
-                    cellControl.Text = cell.DisplayedValue;
+                    cellControl.Text = cell.Value.ToString();
                     
                     // Color code based on content type
                     if (!string.IsNullOrEmpty(cell.Formula))
                     {
                         cellControl.TextColor = Color.FromArgb("#0b5394"); // Blue for formulas
                     }
-                    else if (!string.IsNullOrEmpty(cell.RealValue))
+                    else if (!string.IsNullOrEmpty(cell.Value))
                     {
                         cellControl.TextColor = Colors.Black; // Black for values
                     }

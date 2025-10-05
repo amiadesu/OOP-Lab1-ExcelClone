@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using ExcelClone.Utils;
+using ExcelClone.Values;
 
 namespace ExcelClone.Constants;
 
@@ -12,29 +13,6 @@ public enum Associativity
 
 public static class Functions
 {
-    /// <summary>
-    /// Basic operators with infix notation.<br/>
-    /// https://en.wikipedia.org/wiki/Infix_notation<br/>
-    /// This type of notation only support 2 arguments (left and right).<br/>
-    /// Can have any type of associativity.
-    /// </summary>
-    public static readonly string basicOperators = "+-*/^<=>";
-    /// <summary>
-    /// https://en.wikipedia.org/wiki/Infix_notation<br/>
-    /// This type of notation only support 2 arguments (left and right).<br/>
-    /// We will treat functions from here as left-associative.
-    /// </summary>
-    public static readonly string[] infixNotationFunctions = [
-        "MOD", "DIV", "OR", "AND", "EQV"
-    ];
-    /// <summary>
-    /// https://en.wikipedia.org/wiki/Polish_notation (also called prefix notation)<br/>
-    /// For these functions associavity does not matter.
-    /// </summary>
-    public static readonly string[] prefixNotationFunctions = [
-        "MIN", "MAX", "MMIN", "MMAX", "INC", "DEC", "NOT"
-    ];
-
     public static readonly Dictionary<string, (int precedence, Associativity associativity)> infixFunctionsInfo =
         new(StringComparer.OrdinalIgnoreCase)
         {
@@ -59,7 +37,7 @@ public static class Functions
             { "EQV", (9, Associativity.Left) },
         };
 
-    public static readonly Dictionary<string, Func<double, double, double>> operatorFunctions =
+    public static readonly Dictionary<string, Func<CellValue, CellValue, CellValue>> operatorFunctions =
         new(StringComparer.OrdinalIgnoreCase)
         {
             ["^"] = CellFunctions.PowerOperator,
@@ -83,16 +61,37 @@ public static class Functions
             ["EQV"] = CellFunctions.LogicalEquivalentOperator,
         };
 
-    public static readonly Dictionary<string, Func<double[], double>> prefixFunctions =
+    public static readonly Dictionary<string, Func<CellValue[], CellValue>> prefixFunctions =
         new(StringComparer.OrdinalIgnoreCase)
         {
-            ["SUM"]  = CellFunctions.SumFunction,
-            ["MIN"]  = CellFunctions.MinFunction,
-            ["MAX"]  = CellFunctions.MaxFunction,
+            ["SUM"] = CellFunctions.SumFunction,
+            ["MIN"] = CellFunctions.MinFunction,
+            ["MAX"] = CellFunctions.MaxFunction,
             ["MMIN"] = CellFunctions.MminFunction,
             ["MMAX"] = CellFunctions.MmaxFunction,
-            ["INC"]  = CellFunctions.IncrementFunction,
-            ["DEC"]  = CellFunctions.DecrementFunction,
-            ["NOT"]  = CellFunctions.NotFunction,
+            ["INC"] = CellFunctions.IncrementFunction,
+            ["DEC"] = CellFunctions.DecrementFunction,
+            ["NOT"] = CellFunctions.NotFunction,
         };
+        
+    /// <summary>
+    /// Basic operators with infix notation.<br/>
+    /// https://en.wikipedia.org/wiki/Infix_notation<br/>
+    /// This type of notation only support 2 arguments (left and right).<br/>
+    /// Can have any type of associativity.
+    /// </summary>
+    public static readonly string basicOperators = "+-*/^<=>";
+    /// <summary>
+    /// https://en.wikipedia.org/wiki/Infix_notation<br/>
+    /// This type of notation only support 2 arguments (left and right).<br/>
+    /// Can have any type of associativity.
+    /// </summary>
+    public static readonly Dictionary<string, Func<CellValue, CellValue, CellValue>>.KeyCollection
+        infixNotationFunctions = operatorFunctions.Keys;
+    /// <summary>
+    /// https://en.wikipedia.org/wiki/Polish_notation (also called prefix notation)<br/>
+    /// For these functions associavity does not matter.
+    /// </summary>
+    public static readonly Dictionary<string, Func<CellValue[], CellValue>>.KeyCollection
+        prefixNotationFunctions = prefixFunctions.Keys;
 }

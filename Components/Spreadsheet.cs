@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ExcelClone.Services;
 using ExcelClone.Constants;
+using ExcelClone.Values;
 
 namespace ExcelClone.Components
 {
@@ -50,14 +51,12 @@ namespace ExcelClone.Components
             if (value.StartsWith(Literals.prefix))
             {
                 cell.Formula = value;
-                cell.RealValue = value;
-                cell.DisplayedValue = _formulaParser.Evaluate(value, cellName, this);
+                cell.Value = _formulaParser.Evaluate(value, cellName, this);
             }
             else
             {
-                cell.Formula = "";
-                cell.RealValue = value;
-                cell.DisplayedValue = value;
+                cell.Formula = value;
+                cell.Value.Value = value;
             }
 
             // Recalculate cells
@@ -67,13 +66,13 @@ namespace ExcelClone.Components
         public string GetCellDisplayValue(string cellName)
         {
             var cell = GetCell(cellName);
-            return cell?.DisplayedValue ?? "#REF!";
+            return cell?.Value.ToString() ?? Literals.refErrorMessage;
         }
 
-        public string GetCellRealValue(string cellName)
+        public CellValue? GetCellRealValue(string cellName)
         {
             var cell = GetCell(cellName);
-            return cell?.RealValue ?? "";
+            return cell?.Value ?? null;
         }
 
         private void RecalculateCells()
@@ -83,7 +82,7 @@ namespace ExcelClone.Components
             {
                 if (!string.IsNullOrEmpty(cell.Formula))
                 {
-                    cell.DisplayedValue = _formulaParser.Evaluate(cell.Formula, cell.Name, this);
+                    cell.Value = _formulaParser.Evaluate(cell.Formula, cell.Name, this);
                 }
             }
         }

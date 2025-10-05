@@ -7,6 +7,7 @@ using ExcelClone.Evaluators.Automatons;
 using ExcelClone.Evaluators.Tokens;
 using ExcelClone.Utils;
 using ExcelClone.Constants;
+using ExcelClone.Values;
 
 namespace ExcelClone.Services;
 
@@ -19,7 +20,7 @@ public class FormulaParserService : IFormulaParserService
 
     private readonly NumberAutomaton _numberAutomaton = new NumberAutomaton();
 
-    public string Evaluate(string formula, string currentCell, Spreadsheet spreadsheet)
+    public CellValue Evaluate(string formula, string currentCell, Spreadsheet spreadsheet)
     {
         if (formula.StartsWith(Literals.prefix))
         {
@@ -52,22 +53,21 @@ public class FormulaParserService : IFormulaParserService
             switch (token.Type)
             {
                 case TokenType.CellReference:
-                    string realCellValue = _currentSpreadsheet.GetCellDisplayValue(token.Value);
-                    string cellValue = realCellValue;
-                    if (cellValue.StartsWith('-') || cellValue.StartsWith('+'))
+                    CellValue? realCellValue = _currentSpreadsheet.GetCellRealValue(token.Value);
+                    if (realCellValue is null)
                     {
-                        cellValue = cellValue[1..];
+                        return Literals.refErrorMessage;
                     }
-                    if (_numberAutomaton.TestString(cellValue))
+                    if (StringChecker.IsSignedNumber(realCellValue.Value))
                     {
                         tokens[idx] = new Token
                         {
-                            Type = TokenType.Number,
-                            Value = realCellValue,
+                            Type = TokenType.CellValue,
+                            CellValue = realCellValue,
                             Position = token.Position
                         };
                     }
-                    else if (StringChecker.IsError(realCellValue))
+                    else if (StringChecker.IsError(realCellValue.Value))
                     {
                         return Literals.errorMessage;
                     }
@@ -75,8 +75,8 @@ public class FormulaParserService : IFormulaParserService
                     {
                         tokens[idx] = new Token
                         {
-                            Type = TokenType.Text,
-                            Value = realCellValue,
+                            Type = TokenType.CellValue,
+                            CellValue = realCellValue,
                             Position = token.Position
                         };
                     }
@@ -88,8 +88,8 @@ public class FormulaParserService : IFormulaParserService
 
         try
         {
-            double result = FormulaEvaluator.Evaluate(tokens);
-            return DataFormatter.FormatFloatingPoint(result);
+            CellValue result = FormulaEvaluator.Evaluate(tokens);
+            return result;
         }
         catch (Exception e)
         {
