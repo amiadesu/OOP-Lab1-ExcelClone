@@ -257,7 +257,8 @@ public partial class SpreadsheetPage : ContentPage {
             if (_cellControls.ContainsKey(cell.Name))
             {
                 var cellControl = _cellControls[cell.Name];
-                cellControl.Text = cell.Value.ToString();
+
+                UpdateCellText(ref cellControl, cell);                
                 
                 if (!string.IsNullOrEmpty(cell.Formula))
                 {
@@ -303,6 +304,23 @@ public partial class SpreadsheetPage : ContentPage {
         
         DataGridScroll.ScrollToAsync(DataGridScroll.ScrollX, e.ScrollY, false);
         _isScrolling = false;
+    }
+
+    private void OnDisplayModeToggle(object sender, ToggledEventArgs e)
+    {
+        UpdateAllCellDisplays();
+    }
+
+    private void UpdateCellText(ref Label cellObject, ExcelCell cellData)
+    {
+        if (DisplayModeSwitch.IsToggled)
+        {
+            cellObject.Text = cellData.Formula;
+        }
+        else
+        {
+            cellObject.Text = cellData.Value.ToString();
+        }
     }
 
     private void ShowError(string title, string message)

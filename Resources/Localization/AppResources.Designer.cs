@@ -320,16 +320,26 @@ namespace ExcelClone.Resources.Localization {
                 return ResourceManager.GetString("EnterValuePlaceholder", resourceCulture);
             }
         }
-        
-        internal static string HelpPage {
-            get {
+
+        internal static string HelpPage
+        {
+            get
+            {
                 return ResourceManager.GetString("HelpPage", resourceCulture);
             }
         }
-        
-        internal static string NoRecentFiles {
-            get {
+
+        internal static string NoRecentFiles
+        {
+            get
+            {
                 return ResourceManager.GetString("NoRecentFiles", resourceCulture);
+            }
+        }
+        
+        internal static string ShowFormulasInsteadOfValues {
+            get {
+                return ResourceManager.GetString("ShowFormulasInsteadOfValues", resourceCulture);
             }
         }
 

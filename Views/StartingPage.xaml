@@ -27,7 +27,7 @@
                         <Frame Padding="10">
                                 <ScrollView>
                                         <VerticalStackLayout Spacing="8">
-                                                <HorizontalStackLayout Spacing="10" Padding="5" HorizontalOptions="Center">
+                                                <HorizontalStackLayout Spacing="10" Padding="2" HorizontalOptions="Center">
                                                         <Label Text="{x:Static locales:AppResources.RecentFiles}" 
                                                                 FontSize="16" 
                                                                 FontAttributes="Bold"

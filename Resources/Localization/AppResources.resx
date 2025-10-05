@@ -265,4 +265,8 @@
     <value>Немає нещодавніх файлів...</value>
     <comment/>
   </data>
+  <data name="ShowFormulasInsteadOfValues" xml:space="preserve">
+    <value>Показувати формули замість значень</value>
+    <comment/>
+  </data>
 </root>

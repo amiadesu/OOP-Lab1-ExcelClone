@@ -46,11 +46,26 @@
                             Grid.Column="3"
                             Text="20"/>
                 </Grid>
-                <Button x:Name="GenerateButton"
-                        Text="{x:Static locales:AppResources.GenerateGrid}"
-                        Clicked="OnGenerateClicked"
-                        BackgroundColor="#217346"
-                        TextColor="White"/>
+                <Grid ColumnDefinitions="6*,4*" ColumnSpacing="10">
+                        <Button Grid.Column="0"
+                                x:Name="GenerateButton"
+                                Text="{x:Static locales:AppResources.GenerateGrid}"
+                                Clicked="OnGenerateClicked"
+                                BackgroundColor="#217346"
+                                TextColor="White"/>
+                        
+                        <Grid Grid.Column="1" ColumnDefinitions="7*,3*" ColumnSpacing="10">
+                                <Label Grid.Column="0" Text="{x:Static locales:AppResources.ShowFormulasInsteadOfValues}"
+                                        VerticalOptions="Center"
+                                        HorizontalOptions="End"/>
+
+                                <Switch Grid.Column="1" x:Name="DisplayModeSwitch" 
+                                        Toggled="OnDisplayModeToggle"
+                                        VerticalOptions="Center"
+                                        HorizontalOptions="Start"/>
+                        </Grid>
+
+                </Grid>
             </VerticalStackLayout>
         </Frame>
 
