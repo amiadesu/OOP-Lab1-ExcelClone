@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using ExcelClone.Resources.Localization;
 using ExcelClone.Values;
 
 namespace ExcelClone.Utils;
@@ -20,7 +21,9 @@ public static class CellFunctions
     {
         if (right == 0)
         {
-            throw new Exception("Cannot divide by 0");
+            throw new Exception(DataProcessor.FormatResource(
+                AppResources.CannotDivideBy0
+            ));
         }
         return left / right;
     }
@@ -39,7 +42,9 @@ public static class CellFunctions
     {
         if (right == 0)
         {
-            throw new Exception("Cannot divide by 0");
+            throw new Exception(DataProcessor.FormatResource(
+                AppResources.CannotDivideBy0
+            ));
         }
         return left % right;
     }
@@ -48,7 +53,9 @@ public static class CellFunctions
     {
         if (right == 0)
         {
-            throw new Exception("Cannot divide by 0");
+            throw new Exception(DataProcessor.FormatResource(
+                AppResources.CannotDivideBy0
+            ));
         }
         return (int)(left / right);
     }
@@ -114,7 +121,11 @@ public static class CellFunctions
     {
         if (args.Length != 2)
         {
-            throw new Exception("MIN expects exactly 2 arguments");
+            throw new Exception(DataProcessor.FormatResource(
+                AppResources.ExpectsExactlyNArguments,
+                ("FunctionName", "MIN"),
+                ("Count", 2)
+            ));
         }
         return CellValueLinq.Min(args);
     }
@@ -123,7 +134,11 @@ public static class CellFunctions
     {
         if (args.Length != 2)
         {
-            throw new Exception("MAX expects exactly 2 arguments");
+            throw new Exception(DataProcessor.FormatResource(
+                AppResources.ExpectsExactlyNArguments,
+                ("FunctionName", "MAX"),
+                ("Count", 2)
+            ));
         }
         return CellValueLinq.Max(args);
     }
@@ -142,7 +157,11 @@ public static class CellFunctions
     {
         if (args.Length != 1)
         {
-            throw new Exception("INC expects exactly 1 argument");
+            throw new Exception(DataProcessor.FormatResource(
+                AppResources.ExpectsExactlyNArguments,
+                ("FunctionName", "INC"),
+                ("Count", 1)
+            ));
         }
         return args[0] + 1;
     }
@@ -151,7 +170,11 @@ public static class CellFunctions
     {
         if (args.Length != 1)
         {
-            throw new Exception("DEC expects exactly 1 argument");
+            throw new Exception(DataProcessor.FormatResource(
+                AppResources.ExpectsExactlyNArguments,
+                ("FunctionName", "DEC"),
+                ("Count", 1)
+            ));
         }
         return args[0] - 1;
     }
@@ -160,7 +183,11 @@ public static class CellFunctions
     {
         if (args.Length != 1)
         {
-            throw new Exception("NOT expects exactly 1 argument");
+            throw new Exception(DataProcessor.FormatResource(
+                AppResources.ExpectsExactlyNArguments,
+                ("FunctionName", "NOT"),
+                ("Count", 1)
+            ));
         }
         return args[0] == 0;
     }

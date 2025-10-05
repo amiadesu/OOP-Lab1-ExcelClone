@@ -5,6 +5,8 @@ using ExcelClone.Evaluators.Automatons;
 
 using System.Diagnostics;
 using ExcelClone.Constants;
+using ExcelClone.Utils;
+using ExcelClone.Resources.Localization;
 
 namespace ExcelClone.Evaluators.Tokens;
 
@@ -135,7 +137,11 @@ public class FormulaTokenizer
         }
         else
         {
-            throw new FormatException($"Unexpected character '{c}' at position {position}");
+            throw new FormatException(DataProcessor.FormatResource(
+                AppResources.UnexpectedCharacter,
+                ("Character", c),
+                ("Position", position)
+            ));
         }
     }
 

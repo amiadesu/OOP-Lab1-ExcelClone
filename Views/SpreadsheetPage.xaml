@@ -1,5 +1,5 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage x:Class="ExcelClone.MainPage"
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage x:Class="ExcelClone.Views.SpreadsheetPage"
              xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              Title="Excel Clone">
@@ -18,9 +18,14 @@
                     <Entry x:Name="ColumnsEntry" Grid.Row="0" Grid.Column="1" Text="10"/>
                     <Label Text="Rows:" Grid.Row="0" Grid.Column="2" VerticalOptions="Center"/>
                     <Entry x:Name="RowsEntry" Grid.Row="0" Grid.Column="3" Text="20"/>
-                    <Button x:Name="GenerateButton" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4"
+                    <Grid Grid.Row="1" ColumnDefinitions="Auto, Auto" ColumnSpacing="10">
+                        <Button x:Name="GenerateButton" Grid.Column="0"
                             Text="Generate Grid" Clicked="OnGenerateClicked"
                             BackgroundColor="#217346" TextColor="White"/>
+                        <Button x:Name="SaveButton" Grid.Column="1"
+                                Text="Save Grid" Clicked="OnSaveClicked"
+                                BackgroundColor="#217346" TextColor="White"/>
+                    </Grid>
                 </Grid>
             </VerticalStackLayout>
         </Frame>
@@ -35,8 +40,7 @@
                     </Border>
                     <Entry x:Name="FormulaEntry" Grid.Column="1" 
                            Placeholder="Enter value or formula (e.g., =A1+B1)"
-                           Completed="OnFormulaEntryCompleted"
-                           Unfocused="OnFormulaEntryUnfocused"/>
+                           Completed="OnFormulaEntryCompleted"/>
                 </Grid>
             </Grid>
         </Frame>

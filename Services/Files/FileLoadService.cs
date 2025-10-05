@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using ExcelClone.Services;
 using ExcelClone.Components;
+using ExcelClone.Utils;
+using ExcelClone.Resources.Localization;
 
 namespace ExcelClone.FileSystem;
 
@@ -14,14 +16,20 @@ public static class FileLoadService
         // Read header
         string? header = reader.ReadLine();
         if (header == null)
-            throw new InvalidDataException("File is empty.");
+        {
+            throw new InvalidDataException(DataProcessor.FormatResource(
+                AppResources.EmptyFile
+            ));
+        }
 
         var parts = header.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         if (parts.Length != 2 ||
             !int.TryParse(parts[0], out int columns) ||
             !int.TryParse(parts[1], out int rows))
         {
-            throw new InvalidDataException("Invalid header format.");
+            throw new InvalidDataException(DataProcessor.FormatResource(
+                AppResources.InvalidFileHeader
+            ));
         }
 
         var spreadsheet = new Spreadsheet(columns, rows, parser, nameService);
@@ -36,7 +44,10 @@ public static class FileLoadService
             string cellName = nameService.GetCellName(col, row);
 
             if (!string.IsNullOrEmpty(line))
-                spreadsheet.SetCellValue(cellName, line);
+            {
+                string errorMessage = "";
+                spreadsheet.SetCellValue(cellName, line, ref errorMessage);                
+            }
 
             i++;
         }

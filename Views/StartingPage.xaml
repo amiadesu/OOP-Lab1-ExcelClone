@@ -1,0 +1,22 @@
+<ContentPage 
+        x:Class="ExcelClone.Views.StartingPage"
+        xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+        xmlns:locales="clr-namespace:ExcelClone.Resources.Localization"
+        Title="Start">
+    <VerticalStackLayout Padding="20">
+        <Label Text="Starting Page" FontSize="24" HorizontalOptions="Center" />
+
+        <Grid ColumnDefinitions="2*,8*">
+                <Button Grid.Column="0"
+                        Text="{x:Static locales:AppResources.OpenFile}"
+                        Clicked="OnOpenFilesClicked"
+                        Margin="5,10"/>
+
+                <Button Grid.Column="1"
+                        Text="Open Spreadsheet"
+                        Clicked="OnOpenSpreadsheetClicked"
+                        Margin="5,10"/>
+        </Grid>
+    </VerticalStackLayout>
+</ContentPage>
