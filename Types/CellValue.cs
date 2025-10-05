@@ -191,7 +191,7 @@ public class CellValue : IComparable<CellValue>
     {
         return cell.Type switch
         {
-            CellValueType.Boolean => string.Equals(cell.Value, "TRUE", StringComparison.OrdinalIgnoreCase),
+            CellValueType.Boolean => string.Equals(cell.Value, Literals.trueLiteral, StringComparison.OrdinalIgnoreCase),
             CellValueType.Number => !DoubleChecker.Equal(cell.NumberValue, 0),
             CellValueType.Text => !string.IsNullOrEmpty(cell.Value),
             _ => throw new InvalidCastException(DataProcessor.FormatResource(
@@ -227,7 +227,7 @@ public class CellValue : IComparable<CellValue>
         return Type switch
         {
             CellValueType.Number => DataProcessor.FormatFloatingPoint(NumberValue),
-            CellValueType.Boolean => DoubleChecker.Equal(NumberValue, 1) ? "TRUE" : "FALSE",
+            CellValueType.Boolean => DoubleChecker.Equal(NumberValue, 1) ? Literals.trueLiteral : Literals.falseLiteral,
             CellValueType.RefError => Literals.refErrorMessage,
             CellValueType.GeneralError => Literals.errorMessage,
             _ => Value
@@ -253,12 +253,12 @@ public class CellValue : IComparable<CellValue>
 
     public void ProcessValue()
     {
-        if (Value == "FALSE")
+        if (Value == Literals.falseLiteral)
         {
             NumberValue = 0;
             Type = CellValueType.Boolean;
         }
-        else if (Value == "TRUE")
+        else if (Value == Literals.trueLiteral)
         {
             NumberValue = 1;
             Type = CellValueType.Boolean;
