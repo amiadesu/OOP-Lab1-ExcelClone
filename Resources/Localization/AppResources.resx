@@ -205,4 +205,20 @@
     <value>Файл не вдалося зберегти. Помилка: {Error}</value>
     <comment/>
   </data>
+  <data name="EnterValidNumbers" xml:space="preserve">
+    <value>Будь ласка, введіть валідні числа</value>
+    <comment/>
+  </data>
+  <data name="DimensionsMustBeGreaterThan0" xml:space="preserve">
+    <value>Розміри таблиці повинні бути більші за 0</value>
+    <comment/>
+  </data>
+  <data name="CreatingGrid" xml:space="preserve">
+    <value>Створюється таблиця {Columns}x{Rows}...</value>
+    <comment/>
+  </data>
+  <data name="GridCreated" xml:space="preserve">
+    <value>Таблицю {Columns}x{Rows} створено за {TimeMs}мс</value>
+    <comment/>
+  </data>
 </root>

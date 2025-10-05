@@ -7,8 +7,13 @@ public static class Literals
     public const string trueLiteral = "TRUE";
     public const string falseLiteral = "FALSE";
     public const string defaultFileName = "result.table";
+
     public const int maxAmountOfRows = 100;
     public const int maxAmountOfColumns = 100;
+
+    public const int cellWidth = 100;
+    public const int cellHeight = 25;
+
     public static string prefix = "=";
     public static int prefixLength = prefix.Length;
 

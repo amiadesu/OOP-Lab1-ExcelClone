@@ -165,5 +165,29 @@ namespace ExcelClone.Resources.Localization {
             }
         }
 
+        internal static string EnterValidNumbers {
+            get {
+                return ResourceManager.GetString("EnterValidNumbers", resourceCulture);
+            }
+        }
+
+        internal static string DimensionsMustBeGreaterThan0 {
+            get {
+                return ResourceManager.GetString("DimensionsMustBeGreaterThan0", resourceCulture);
+            }
+        }
+
+        internal static string CreatingGrid {
+            get {
+                return ResourceManager.GetString("CreatingGrid", resourceCulture);
+            }
+        }
+
+        internal static string GridCreated {
+            get {
+                return ResourceManager.GetString("GridCreated", resourceCulture);
+            }
+        }
+
     }
 }
