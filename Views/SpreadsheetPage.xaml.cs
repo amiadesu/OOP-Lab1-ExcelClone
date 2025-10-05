@@ -40,7 +40,7 @@ public partial class SpreadsheetPage : ContentPage {
         InitializeComponent();
         _formulaParserService = new FormulaParserService();
         _cellNameService = new CellNameService();
-        _spreadsheet = FileLoadService.Load(tablePath, _formulaParserService, _cellNameService);
+        _spreadsheet = TableFileService.Load(tablePath, _formulaParserService, _cellNameService);
         _currentColumns = _spreadsheet.Columns;
         _currentRows = _spreadsheet.Rows;
         _fileName = tableFileName;
@@ -57,9 +57,14 @@ public partial class SpreadsheetPage : ContentPage {
         await Shell.Current.Navigation.PushAsync(new StartingPage());
     }
 
+    private async void OnHelpClicked(object sender, EventArgs e)
+    {
+        await Shell.Current.Navigation.PushAsync(new HelpPage());
+    }
+
     private async void OnSaveClicked(object sender, EventArgs e)
     {
-        string result = await FileSaveService.Save(_spreadsheet, _fileName);
+        string result = await TableFileService.Save(_spreadsheet, _fileName);
         await DisplayAlert(
             DataProcessor.FormatResource(
                 AppResources.SavingResult

@@ -8,6 +8,8 @@
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="{x:Static locales:AppResources.HomePage}"
                 Clicked="OnHomeClicked"/>
+        <ToolbarItem Text="{x:Static locales:AppResources.HelpPage}"
+                Clicked="OnHelpClicked"/>
         <ToolbarItem Text="{x:Static locales:AppResources.SaveFile}"
                 Clicked="OnSaveClicked"/>
     </ContentPage.ToolbarItems>

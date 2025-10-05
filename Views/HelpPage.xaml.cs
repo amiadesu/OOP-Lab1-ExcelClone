@@ -26,7 +26,7 @@ public partial class HelpPage : ContentPage {
 
     private async void OnOpenFilesClicked(object sender, EventArgs e)
     {
-        var result = await FilePickService.PickTable("Pick table");
+        var result = await TableFileService.PickTable("Pick table");
         if (result is not null)
         {
             await Shell.Current.Navigation.PushAsync(new SpreadsheetPage(result.FullPath, result.FileName));
