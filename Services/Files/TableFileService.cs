@@ -94,7 +94,7 @@ public static class TableFileService
         return spreadsheet;
     }
 
-    public static async Task<FileResult> PickTable(string pickTitle)
+    public static async Task<(FileResult result, string? errorMessage)> PickTable(string pickTitle)
     {
         var customFileType = new FilePickerFileType(
                 new Dictionary<DevicePlatform, IEnumerable<string>>
@@ -111,20 +111,19 @@ public static class TableFileService
 
         return await PickAndShow(options);
     }
-    public static async Task<FileResult> PickAndShow(PickOptions options)
+    public static async Task<(FileResult result, string? errorMessage)> PickAndShow(PickOptions options)
     {
         try
         {
             var result = await FilePicker.Default.PickAsync(options);
-
-            return result;
+            
+            return (result, "");
         }
         catch (Exception ex)
         {
             // The user canceled or something went wrong
+            return (null, ex.Message);
         }
-
-        return null;
     }
 
     public static async Task<FileSaverResult> PickAndSaveFile(string data, string fileName = "result.table")

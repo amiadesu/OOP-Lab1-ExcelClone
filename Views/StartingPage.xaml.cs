@@ -5,6 +5,8 @@ using System;
 using ExcelClone.FileSystem;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using ExcelClone.Utils;
+using ExcelClone.Resources.Localization;
 
 namespace ExcelClone.Views;
 
@@ -30,10 +32,26 @@ public partial class StartingPage : ContentPage
 
     private async void OnOpenFilesClicked(object sender, EventArgs e)
     {
-        var result = await TableFileService.PickTable("Pick table");
-        if (result is not null)
+        var result = await TableFileService.PickTable(
+            DataProcessor.FormatResource(
+                AppResources.PickTable
+            )
+        );
+        if (result.result is not null)
         {
-            await OpenFile(result.FileName, result.FullPath);
+            await OpenFile(result.result.FileName, result.result.FullPath);
+        }
+        else if (!string.IsNullOrEmpty(result.errorMessage))
+        {
+            await DisplayAlert(
+                DataProcessor.FormatResource(
+                    AppResources.Error
+                ),
+                result.errorMessage,
+                DataProcessor.FormatResource(
+                    AppResources.OK
+                )
+            );
         }
     }
 

@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using ExcelClone.Constants;
 using MauiFileSystem = Microsoft.Maui.Storage.FileSystem;
 
 namespace ExcelClone.FileSystem;
 
 public static class FileHistoryService
 {
-    private static readonly string HistoryFileName = "file_history.txt";
+    private static readonly string HistoryFileName = Literals.defaultHistoryFileName;
 
     private static string GetHistoryFilePath()
     {

@@ -7,6 +7,7 @@ public static class Literals
     public const string trueLiteral = "TRUE";
     public const string falseLiteral = "FALSE";
     public const string defaultFileName = "result.table";
+    public const string defaultHistoryFileName = "file_history.txt";
 
     public const int maxAmountOfRows = 100;
     public const int maxAmountOfColumns = 100;

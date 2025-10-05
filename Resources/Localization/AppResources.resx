@@ -269,4 +269,52 @@
     <value>Показувати формули замість значень</value>
     <comment/>
   </data>
+  <data name="PickTable" xml:space="preserve">
+    <value>Оберіть таблицю</value>
+    <comment/>
+  </data>
+  <data name="InvalidCellNamesInRange" xml:space="preserve">
+    <value>Невалідні назви клітин у заданому діапазоні</value>
+    <comment/>
+  </data>
+  <data name="ColumnAndRowIndicesMustBeNonNegative" xml:space="preserve">
+    <value>Індекси стовпця та рядка мають бути невід'ємними</value>
+    <comment/>
+  </data>
+  <data name="CellNameCannotBeEmpty" xml:space="preserve">
+    <value>Назва клітинки не може бути порожньою</value>
+    <comment/>
+  </data>
+  <data name="InvalidCellNameFormat" xml:space="preserve">
+    <value>Невалідний формат назви клітинки: {CellName}</value>
+    <comment/>
+  </data>
+  <data name="ColumnIndexMustBeNonNegative" xml:space="preserve">
+    <value>Індекс стовпця має бути невід'ємним</value>
+    <comment/>
+  </data>
+  <data name="RowIndexMustBeNonNegative" xml:space="preserve">
+    <value>Індекс рядка має бути невід'ємним</value>
+    <comment/>
+  </data>
+  <data name="ColumnNameCannotBeEmpty" xml:space="preserve">
+    <value>Назва стовпця не може бути порожньою</value>
+    <comment/>
+  </data>
+  <data name="RowNameCannotBeEmpty" xml:space="preserve">
+    <value>Назва рядка не може бути порожньою</value>
+    <comment/>
+  </data>
+  <data name="InvalidCharacterInColumnName" xml:space="preserve">
+    <value>Невалідний символ у назві стовпця: {Character}</value>
+    <comment/>
+  </data>
+  <data name="InvalidRowName" xml:space="preserve">
+    <value>Невалідна назва рядка: {RowName}</value>
+    <comment/>
+  </data>
+  <data name="RangeMustBeInFormat" xml:space="preserve">
+    <value>Діапазон має бути у форматі 'Початкова клітина:Кінцева клітина'</value>
+    <comment/>
+  </data>
 </root>

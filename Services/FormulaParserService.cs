@@ -35,8 +35,8 @@ public class FormulaParserService : IFormulaParserService
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Formula evaluation error: {e.Message}");
-                return "#ERROR!";
+                Trace.WriteLine($"Formula evaluation error: {e.Message}");
+                return Literals.errorMessage;
             }
         }
 
