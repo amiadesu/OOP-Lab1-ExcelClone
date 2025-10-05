@@ -117,14 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="OpenFile" xml:space="preserve">
-    <value>Відкрити файл</value>
-    <comment/>
-  </data>
-  <data name="SaveFileAs" xml:space="preserve">
-    <value>Зберегти файл як</value>
-    <comment/>
-  </data>
   <data name="UnexpectedToken" xml:space="preserve">
     <value>Неочікуваний токен: {Token}</value>
     <comment/>
@@ -219,6 +211,58 @@
   </data>
   <data name="GridCreated" xml:space="preserve">
     <value>Таблицю {Columns}x{Rows} створено за {TimeMs}мс</value>
+    <comment/>
+  </data>
+  <data name="OpenFile" xml:space="preserve">
+    <value>Відкрити файл</value>
+    <comment/>
+  </data>
+  <data name="SaveFile" xml:space="preserve">
+    <value>Зберегти файл</value>
+    <comment/>
+  </data>
+  <data name="HomePage" xml:space="preserve">
+    <value>Головна сторінка</value>
+    <comment/>
+  </data>
+  <data name="CreateNewSpreadsheet" xml:space="preserve">
+    <value>Створити нову таблицю</value>
+    <comment/>
+  </data>
+  <data name="EnterGridDimensions" xml:space="preserve">
+    <value>Введіть розміри таблиці:</value>
+    <comment/>
+  </data>
+  <data name="EnterColumns" xml:space="preserve">
+    <value>Стовпчики:</value>
+    <comment/>
+  </data>
+  <data name="EnterRows" xml:space="preserve">
+    <value>Рядки:</value>
+    <comment/>
+  </data>
+  <data name="GenerateGrid" xml:space="preserve">
+    <value>Створити таблицю</value>
+    <comment/>
+  </data>
+  <data name="RecentFiles" xml:space="preserve">
+    <value>Нещодавні файли</value>
+    <comment/>
+  </data>
+  <data name="Clear" xml:space="preserve">
+    <value>Очистити</value>
+    <comment/>
+  </data>
+  <data name="EnterValuePlaceholder" xml:space="preserve">
+    <value>Введіть значення або формулу (наприклад, =A1+B2)</value>
+    <comment/>
+  </data>
+  <data name="HelpPage" xml:space="preserve">
+    <value>Допомога</value>
+    <comment/>
+  </data>
+  <data name="NoRecentFiles" xml:space="preserve">
+    <value>Немає нещодавніх файлів...</value>
     <comment/>
   </data>
 </root>

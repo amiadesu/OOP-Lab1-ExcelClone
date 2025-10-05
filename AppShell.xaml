@@ -9,7 +9,7 @@
     Title="ExcelClone">
 
     <ShellContent
-        Title="Home"
+        Title="ExcelClone"
         ContentTemplate="{DataTemplate views:StartingPage}"
         Route="StartingPage" 
         />

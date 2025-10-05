@@ -3,20 +3,61 @@
         xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
         xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
         xmlns:locales="clr-namespace:ExcelClone.Resources.Localization"
-        Title="Start">
+        Title="ExcelClone">
     <VerticalStackLayout Padding="20">
-        <Label Text="Starting Page" FontSize="24" HorizontalOptions="Center" />
+        <Label Text="{x:Static locales:AppResources.HomePage}" FontSize="24" HorizontalOptions="Center" />
 
         <Grid ColumnDefinitions="2*,8*">
-                <Button Grid.Column="0"
-                        Text="{x:Static locales:AppResources.OpenFile}"
+            <VerticalStackLayout Grid.Column="0">
+                <Button Text="{x:Static locales:AppResources.OpenFile}"
                         Clicked="OnOpenFilesClicked"
                         Margin="5,10"/>
+                
+                <Button Text="{x:Static locales:AppResources.HelpPage}"
+                        Clicked="OnHelpPageClicked"
+                        Margin="5,10"/>
+            </VerticalStackLayout>
 
-                <Button Grid.Column="1"
-                        Text="Open Spreadsheet"
+            <VerticalStackLayout Grid.Column="1">
+                <Button Text="{x:Static locales:AppResources.CreateNewSpreadsheet}"
                         Clicked="OnOpenSpreadsheetClicked"
                         Margin="5,10"/>
+
+                <Grid Grid.Column="1" Grid.Row="1" Margin="5">
+                        <Frame Padding="10">
+                                <ScrollView>
+                                        <VerticalStackLayout Spacing="8">
+                                                <HorizontalStackLayout Spacing="10" Padding="5" HorizontalOptions="Center">
+                                                        <Label Text="{x:Static locales:AppResources.RecentFiles}" 
+                                                                FontSize="16" 
+                                                                FontAttributes="Bold"
+                                                                VerticalOptions="Center"/>
+                                                        
+                                                        <Button Text="{x:Static locales:AppResources.Clear}"
+                                                                Clicked="OnClearRecentFilesClicked"
+                                                                VerticalOptions="Center"/>
+                                                </HorizontalStackLayout>
+                                                
+                                                
+                                                <BoxView HeightRequest="1" 
+                                                        Color="Gray" 
+                                                        HorizontalOptions="Fill"/>
+
+                                                <Label Text="{x:Static locales:AppResources.NoRecentFiles}"
+                                                        x:Name="NoRecentFilesLabel"
+                                                        TextColor="Gray" 
+                                                        HorizontalOptions="Center"
+                                                        IsVisible="True"/>
+                                                
+                                                <VerticalStackLayout x:Name="RecentItemsContainer"
+                                                                        Spacing="5"
+                                                                        IsVisible="False">
+                                                </VerticalStackLayout>
+                                        </VerticalStackLayout>
+                                </ScrollView>
+                        </Frame>
+                </Grid>
+            </VerticalStackLayout>
         </Grid>
     </VerticalStackLayout>
 </ContentPage>
