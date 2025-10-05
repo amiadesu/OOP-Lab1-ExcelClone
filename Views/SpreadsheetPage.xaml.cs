@@ -33,7 +33,7 @@ public partial class SpreadsheetPage : ContentPage {
         InitializeComponent();
         _formulaParserService = new FormulaParserService();
         _cellNameService = new CellNameService();
-        GenerateExcelGridAsync(true).RunSynchronously();
+        GenerateExcelGridAsync(true);
     }
 
     public SpreadsheetPage(string tablePath, string tableFileName)
@@ -45,7 +45,7 @@ public partial class SpreadsheetPage : ContentPage {
         _currentColumns = _spreadsheet.Columns;
         _currentRows = _spreadsheet.Rows;
         _fileName = tableFileName;
-        GenerateExcelGridAsync(false).RunSynchronously();
+        GenerateExcelGridAsync(false);
     }
 
     private async void OnGenerateClicked(object sender, EventArgs e)
