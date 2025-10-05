@@ -26,6 +26,7 @@ public class CellValue : IComparable<CellValue>
         set
         {
             _value = value;
+            Type = CellValueType.Text; // To allow user to get rid from #REF or #ERROR messages inside cell
             ProcessValue();
         }
     }
