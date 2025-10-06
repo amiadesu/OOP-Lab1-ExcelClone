@@ -1,4 +1,5 @@
-﻿using Microsoft.Maui.Controls;
+﻿using Microsoft.Maui;
+using Microsoft.Maui.Controls;
 namespace ExcelClone;
 
 public partial class App : Application
@@ -6,7 +7,12 @@ public partial class App : Application
 	public App()
 	{
 		InitializeComponent();
-
-		MainPage = new AppShell();
 	}
+
+	protected override Window CreateWindow(IActivationState? activationState = null)
+	{
+		var startingPage = new AppShell();
+
+		return new Window(startingPage);
+    }
 }

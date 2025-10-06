@@ -170,7 +170,7 @@ namespace ExcelClone.Evaluators
                 if (token.Type == TokenType.CellValue)
                 {
                     Next();
-                    return token.CellValue;
+                    return token.CellValue!;
                 }
 
                 // Parentheses

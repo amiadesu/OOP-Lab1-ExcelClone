@@ -23,7 +23,7 @@ public partial class SpreadsheetPage : ContentPage
     private readonly string _fileName = Literals.defaultFileName;
 
     private Spreadsheet _spreadsheet;
-    private ExcelCell _activeCell;
+    private ExcelCell? _activeCell;
     private readonly Dictionary<string, Label> _cellControls = new Dictionary<string, Label>();
     private readonly IFormulaParserService _formulaParserService;
     private readonly ICellNameService _cellNameService;
@@ -204,6 +204,12 @@ public partial class SpreadsheetPage : ContentPage
 
                 var excelCell = _spreadsheet.GetCell(cellAddress);
 
+                if (excelCell is null)
+                {
+                    Trace.WriteLine($"Cell {cellAddress} is unexpectedly empty");
+                    continue;
+                }
+
                 var cell = UIGenerator.GenerateCell(excelCell, col, row, ref DataGridLayout);
 
                 var tapGesture = new TapGestureRecognizer();
@@ -223,6 +229,12 @@ public partial class SpreadsheetPage : ContentPage
         }
 
         _activeCell = _spreadsheet.GetCell(cellAddress);
+
+        if (_activeCell is null)
+        {
+            Trace.WriteLine($"Cell {_activeCell} is unexpectedly empty");
+            return;
+        }
 
         cellControl.BackgroundColor = ColorConstants.activeCellBackgroundColor;
 

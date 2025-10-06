@@ -20,7 +20,7 @@
           RowSpacing="15">
 
         <!-- Input Section -->
-        <Frame Grid.Row="0"
+        <Border Grid.Row="0"
                 BackgroundColor="#f5f5f5"
                 Padding="15">
             <VerticalStackLayout Spacing="10">
@@ -69,10 +69,10 @@
 
                 </Grid>
             </VerticalStackLayout>
-        </Frame>
+        </Border>
 
         <!-- Excel-like Formula Bar -->
-        <Frame Grid.Row="1"
+        <Border Grid.Row="1"
                 BackgroundColor="#f8f9fa"
                 Padding="10"
                 x:Name="FormulaBarContainer">
@@ -99,7 +99,7 @@
                            Completed="OnFormulaEntryCompleted"/>
                 </Grid>
             </Grid>
-        </Frame>
+        </Border>
 
         <Label x:Name="StatusLabel"
                 Grid.Row="2"

@@ -36,7 +36,7 @@ namespace ExcelClone.Components
             }
         }
 
-        public ExcelCell GetCell(string cellName)
+        public ExcelCell? GetCell(string cellName)
         {
             return _cells.ContainsKey(cellName.ToUpper()) ? _cells[cellName.ToUpper()] : null;
         }
@@ -82,7 +82,7 @@ namespace ExcelClone.Components
             {
                 if (!string.IsNullOrEmpty(cell.Formula))
                 {
-                    string message = "";
+                    string? message = "";
                     cell.Value = _formulaParser.Evaluate(cell.Formula, cell.Name, this, ref message);
                 }
             }
