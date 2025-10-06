@@ -15,12 +15,13 @@ using ExcelClone.Constants;
 
 namespace ExcelClone.Views;
 
-public partial class SpreadsheetPage : ContentPage {
+public partial class SpreadsheetPage : ContentPage
+{
     private bool _isScrolling = false;
     private int _currentColumns = 0;
     private int _currentRows = 0;
     private readonly string _fileName = Literals.defaultFileName;
-    
+
     private Spreadsheet _spreadsheet;
     private ExcelCell _activeCell;
     private readonly Dictionary<string, Label> _cellControls = new Dictionary<string, Label>();
@@ -54,12 +55,16 @@ public partial class SpreadsheetPage : ContentPage {
 
     private async void OnHomeClicked(object sender, EventArgs e)
     {
-        await Shell.Current.Navigation.PushAsync(new StartingPage());
+        bool result = await OpenConfirmation();
+        if (result)
+            await Shell.Current.Navigation.PushAsync(new StartingPage());
     }
 
     private async void OnHelpClicked(object sender, EventArgs e)
     {
-        await Shell.Current.Navigation.PushAsync(new HelpPage());
+        bool result = await OpenConfirmation();
+        if (result)
+            await Shell.Current.Navigation.PushAsync(new HelpPage());
     }
 
     private async void OnSaveClicked(object sender, EventArgs e)
@@ -174,7 +179,7 @@ public partial class SpreadsheetPage : ContentPage {
         for (int col = 0; col < columns; col++)
         {
             string columnName = _cellNameService.GetColumnName(col);
-            
+
             var header = UIGenerator.GenerateColumnHeader(columnName, ref ColumnHeadersLayout);
         }
     }
@@ -196,7 +201,7 @@ public partial class SpreadsheetPage : ContentPage {
             for (int col = 0; col < columns; col++)
             {
                 string cellAddress = _cellNameService.GetCellName(col, row);
-                
+
                 var excelCell = _spreadsheet.GetCell(cellAddress);
 
                 var cell = UIGenerator.GenerateCell(excelCell, col, row, ref DataGridLayout);
@@ -218,9 +223,9 @@ public partial class SpreadsheetPage : ContentPage {
         }
 
         _activeCell = _spreadsheet.GetCell(cellAddress);
-        
+
         cellControl.BackgroundColor = ColorConstants.activeCellBackgroundColor;
-        
+
         ActiveCellLabel.Text = cellAddress;
         FormulaEntry.Text = _activeCell.Formula;
         FormulaEntry.Focus();
@@ -238,7 +243,7 @@ public partial class SpreadsheetPage : ContentPage {
         string inputValue = FormulaEntry.Text?.Trim() ?? "";
 
         string? errorMessage = "";
-        
+
         _spreadsheet.SetCellValue(_activeCell.Name, inputValue, ref errorMessage);
 
         if (errorMessage is not null && errorMessage.Length > 0)
@@ -263,8 +268,8 @@ public partial class SpreadsheetPage : ContentPage {
             {
                 var cellControl = _cellControls[cell.Name];
 
-                UpdateCellText(ref cellControl, cell);                
-                
+                UpdateCellText(ref cellControl, cell);
+
                 if (!string.IsNullOrEmpty(cell.Formula))
                 {
                     cellControl.TextColor = ColorConstants.formulaColor;
@@ -286,10 +291,10 @@ public partial class SpreadsheetPage : ContentPage {
     {
         if (_isScrolling) return;
         _isScrolling = true;
-        
+
         ColumnHeadersScroll.ScrollToAsync(e.ScrollX, 0, false);
         RowHeadersScroll.ScrollToAsync(0, e.ScrollY, false);
-        
+
         _isScrolling = false;
     }
 
@@ -297,7 +302,7 @@ public partial class SpreadsheetPage : ContentPage {
     {
         if (_isScrolling) return;
         _isScrolling = true;
-        
+
         DataGridScroll.ScrollToAsync(e.ScrollX, DataGridScroll.ScrollY, false);
         _isScrolling = false;
     }
@@ -306,7 +311,7 @@ public partial class SpreadsheetPage : ContentPage {
     {
         if (_isScrolling) return;
         _isScrolling = true;
-        
+
         DataGridScroll.ScrollToAsync(DataGridScroll.ScrollX, e.ScrollY, false);
         _isScrolling = false;
     }
@@ -336,5 +341,25 @@ public partial class SpreadsheetPage : ContentPage {
             DataProcessor.FormatResource(
                 AppResources.OK
         ));
+    }
+
+    private async Task<bool> OpenConfirmation()
+    {
+        bool result = await DisplayAlert(
+            DataProcessor.FormatResource(
+                AppResources.ActionConfirmation
+            ),
+            DataProcessor.FormatResource(
+                AppResources.CurrentDataWillBeLost
+            ),
+            DataProcessor.FormatResource(
+                AppResources.Yes
+            ),
+            DataProcessor.FormatResource(
+                AppResources.No
+            )
+        );
+
+        return result;
     }
 }

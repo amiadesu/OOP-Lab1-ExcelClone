@@ -32,7 +32,7 @@ namespace ExcelClone.Resources.Localization {
                 resourceCulture = value;
             }
         }
-
+        
         internal static string UnexpectedToken {
             get {
                 return ResourceManager.GetString("UnexpectedToken", resourceCulture);
@@ -330,6 +330,90 @@ namespace ExcelClone.Resources.Localization {
         internal static string RangeMustBeInFormat {
             get {
                 return ResourceManager.GetString("RangeMustBeInFormat", resourceCulture);
+            }
+        }
+
+        internal static string Info {
+            get {
+                return ResourceManager.GetString("Info", resourceCulture);
+            }
+        }
+
+        internal static string InfoText {
+            get {
+                return ResourceManager.GetString("InfoText", resourceCulture);
+            }
+        }
+
+        internal static string Usage {
+            get {
+                return ResourceManager.GetString("Usage", resourceCulture);
+            }
+        }
+
+        internal static string UsageText {
+            get {
+                return ResourceManager.GetString("UsageText", resourceCulture);
+            }
+        }
+
+        internal static string Functions {
+            get {
+                return ResourceManager.GetString("Functions", resourceCulture);
+            }
+        }
+
+        internal static string FunctionsText {
+            get {
+                return ResourceManager.GetString("FunctionsText", resourceCulture);
+            }
+        }
+
+        internal static string InfixFunctions {
+            get {
+                return ResourceManager.GetString("InfixFunctions", resourceCulture);
+            }
+        }
+
+        internal static string InfixFunctionsText {
+            get {
+                return ResourceManager.GetString("InfixFunctionsText", resourceCulture);
+            }
+        }
+
+        internal static string PrefixFunctions {
+            get {
+                return ResourceManager.GetString("PrefixFunctions", resourceCulture);
+            }
+        }
+
+        internal static string PrefixFunctionsText {
+            get {
+                return ResourceManager.GetString("PrefixFunctionsText", resourceCulture);
+            }
+        }
+
+        internal static string ActionConfirmation {
+            get {
+                return ResourceManager.GetString("ActionConfirmation", resourceCulture);
+            }
+        }
+
+        internal static string CurrentDataWillBeLost {
+            get {
+                return ResourceManager.GetString("CurrentDataWillBeLost", resourceCulture);
+            }
+        }
+
+        internal static string Yes {
+            get {
+                return ResourceManager.GetString("Yes", resourceCulture);
+            }
+        }
+
+        internal static string No {
+            get {
+                return ResourceManager.GetString("No", resourceCulture);
             }
         }
 
