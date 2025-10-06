@@ -1,5 +1,6 @@
 using System;
 using ExcelClone.Constants;
+using ExcelClone.Resources.Localization;
 using ExcelClone.Utils;
 
 namespace ExcelClone.Values;
@@ -25,6 +26,7 @@ public class CellValue : IComparable<CellValue>
         set
         {
             _value = value;
+            Type = CellValueType.Text; // To allow user to get rid from #REF or #ERROR messages inside cell
             ProcessValue();
         }
     }
@@ -103,33 +105,51 @@ public class CellValue : IComparable<CellValue>
     {
         if (a.Type == CellValueType.Number && b.Type == CellValueType.Number)
             return new CellValue(CellValueType.Number, numberValue: a.NumberValue + b.NumberValue);
-        throw new InvalidOperationException("Operator + is only valid for numbers");
+
+        throw new InvalidOperationException(DataProcessor.FormatResource(
+            AppResources.OperatorDefinedOnlyForNumbers,
+            ("Operator", "+")
+        ));
     }
     public static CellValue operator +(CellValue cell)
     {
         if (cell.Type == CellValueType.Number)
             return new CellValue(CellValueType.Number, numberValue: +cell.NumberValue);
 
-        throw new InvalidOperationException("Unary plus is only valid for numbers");
+        throw new InvalidOperationException(DataProcessor.FormatResource(
+            AppResources.UnaryOperatorDefinedOnlyForNumbers,
+            ("Operator", "+")
+        ));
     }
     public static CellValue operator -(CellValue a, CellValue b)
     {
         if (a.Type == CellValueType.Number && b.Type == CellValueType.Number)
             return new CellValue(CellValueType.Number, numberValue: a.NumberValue - b.NumberValue);
-        throw new InvalidOperationException("Operator - is only valid for numbers");
+
+        throw new InvalidOperationException(DataProcessor.FormatResource(
+            AppResources.OperatorDefinedOnlyForNumbers,
+            ("Operator", "-")
+        ));
     }
     public static CellValue operator -(CellValue cell)
     {
         if (cell.Type == CellValueType.Number)
             return new CellValue(CellValueType.Number, numberValue: -cell.NumberValue);
 
-        throw new InvalidOperationException("Unary minus is only valid for numbers");
+        throw new InvalidOperationException(DataProcessor.FormatResource(
+            AppResources.UnaryOperatorDefinedOnlyForNumbers,
+            ("Operator", "-")
+        ));
     }
     public static CellValue operator *(CellValue a, CellValue b)
     {
         if (a.Type == CellValueType.Number && b.Type == CellValueType.Number)
             return new CellValue(CellValueType.Number, numberValue: a.NumberValue * b.NumberValue);
-        throw new InvalidOperationException("Operator * is only valid for numbers");
+
+        throw new InvalidOperationException(DataProcessor.FormatResource(
+            AppResources.OperatorDefinedOnlyForNumbers,
+            ("Operator", "*")
+        ));
     }
     public static CellValue operator /(CellValue a, CellValue b)
     {
@@ -139,13 +159,21 @@ public class CellValue : IComparable<CellValue>
                 throw new DivideByZeroException();
             return new CellValue(CellValueType.Number, numberValue: a.NumberValue / b.NumberValue);
         }
-        throw new InvalidOperationException("Operator / is only valid for numbers");
+
+        throw new InvalidOperationException(DataProcessor.FormatResource(
+            AppResources.OperatorDefinedOnlyForNumbers,
+            ("Operator", "/")
+        ));
     }
     public static CellValue operator %(CellValue a, CellValue b)
     {
         if (a.Type == CellValueType.Number && b.Type == CellValueType.Number)
             return new CellValue(CellValueType.Number, numberValue: a.NumberValue % b.NumberValue);
-        throw new InvalidOperationException("Operator % is only valid for numbers");
+
+        throw new InvalidOperationException(DataProcessor.FormatResource(
+            AppResources.OperatorDefinedOnlyForNumbers,
+            ("Operator", "%")
+        ));
     }
 
     // Conversion operators
@@ -153,16 +181,25 @@ public class CellValue : IComparable<CellValue>
     public static explicit operator double(CellValue cell)
     {
         if (cell.Type == CellValueType.Number) return cell.NumberValue;
-        throw new InvalidCastException($"Cannot convert {cell.Type} to double");
+
+        throw new InvalidCastException(DataProcessor.FormatResource(
+            AppResources.CannotConvertTo,
+            ("FromType", cell.Type),
+            ("ToType", "double")
+        ));
     }
     public static explicit operator bool(CellValue cell)
     {
         return cell.Type switch
         {
-            CellValueType.Boolean => string.Equals(cell.Value, "TRUE", StringComparison.OrdinalIgnoreCase),
+            CellValueType.Boolean => string.Equals(cell.Value, Literals.trueLiteral, StringComparison.OrdinalIgnoreCase),
             CellValueType.Number => !DoubleChecker.Equal(cell.NumberValue, 0),
             CellValueType.Text => !string.IsNullOrEmpty(cell.Value),
-            _ => throw new InvalidCastException($"Cannot convert {cell.Type} to bool")
+            _ => throw new InvalidCastException(DataProcessor.FormatResource(
+                    AppResources.CannotConvertTo,
+                    ("FromType", cell.Type),
+                    ("ToType", "bool")
+                ))
         };
     }
 
@@ -191,7 +228,7 @@ public class CellValue : IComparable<CellValue>
         return Type switch
         {
             CellValueType.Number => DataProcessor.FormatFloatingPoint(NumberValue),
-            CellValueType.Boolean => DoubleChecker.Equal(NumberValue, 1) ? "TRUE" : "FALSE",
+            CellValueType.Boolean => DoubleChecker.Equal(NumberValue, 1) ? Literals.trueLiteral : Literals.falseLiteral,
             CellValueType.RefError => Literals.refErrorMessage,
             CellValueType.GeneralError => Literals.errorMessage,
             _ => Value
@@ -217,12 +254,12 @@ public class CellValue : IComparable<CellValue>
 
     public void ProcessValue()
     {
-        if (Value == "FALSE")
+        if (Value == Literals.falseLiteral)
         {
             NumberValue = 0;
             Type = CellValueType.Boolean;
         }
-        else if (Value == "TRUE")
+        else if (Value == Literals.trueLiteral)
         {
             NumberValue = 1;
             Type = CellValueType.Boolean;

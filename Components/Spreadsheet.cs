@@ -41,7 +41,7 @@ namespace ExcelClone.Components
             return _cells.ContainsKey(cellName.ToUpper()) ? _cells[cellName.ToUpper()] : null;
         }
 
-        public void SetCellValue(string cellName, string value)
+        public void SetCellValue(string cellName, string value, ref string? errorMessage)
         {
             if (!_cells.ContainsKey(cellName.ToUpper()))
                 return;
@@ -51,7 +51,7 @@ namespace ExcelClone.Components
             if (value.StartsWith(Literals.prefix))
             {
                 cell.Formula = value;
-                cell.Value = _formulaParser.Evaluate(value, cellName, this);
+                cell.Value = _formulaParser.Evaluate(value, cellName, this, ref errorMessage);
             }
             else
             {
@@ -82,7 +82,8 @@ namespace ExcelClone.Components
             {
                 if (!string.IsNullOrEmpty(cell.Formula))
                 {
-                    cell.Value = _formulaParser.Evaluate(cell.Formula, cell.Name, this);
+                    string message = "";
+                    cell.Value = _formulaParser.Evaluate(cell.Formula, cell.Name, this, ref message);
                 }
             }
         }

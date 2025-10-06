@@ -1,5 +1,7 @@
 using System;
 using System.Linq;
+using ExcelClone.Resources.Localization;
+using ExcelClone.Utils;
 
 namespace ExcelClone.Values
 {
@@ -23,7 +25,13 @@ namespace ExcelClone.Values
                 .ToArray();
 
             if (!numericValues.Any())
-                throw new InvalidOperationException("Min requires at least one numeric value");
+            {
+                throw new InvalidOperationException(DataProcessor.FormatResource(
+                    AppResources.ExpectsAtLeastNNumberArguments,
+                    ("FunctionName", "MIN"),
+                    ("Count", 1)
+                ));
+            }
 
             double min = numericValues.Min();
             return new CellValue(CellValueType.Number, numberValue: min);
@@ -37,7 +45,13 @@ namespace ExcelClone.Values
                 .ToArray();
 
             if (!numericValues.Any())
-                throw new InvalidOperationException("Max requires at least one numeric value");
+            {
+                throw new InvalidOperationException(DataProcessor.FormatResource(
+                    AppResources.ExpectsAtLeastNNumberArguments,
+                    ("FunctionName", "MAX"),
+                    ("Count", 1)
+                ));
+            }
 
             double max = numericValues.Max();
             return new CellValue(CellValueType.Number, numberValue: max);

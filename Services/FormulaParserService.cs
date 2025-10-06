@@ -20,7 +20,7 @@ public class FormulaParserService : IFormulaParserService
 
     private readonly NumberAutomaton _numberAutomaton = new NumberAutomaton();
 
-    public CellValue Evaluate(string formula, string currentCell, Spreadsheet spreadsheet)
+    public CellValue Evaluate(string formula, string currentCell, Spreadsheet spreadsheet, ref string? errorMessage)
     {
         if (formula.StartsWith(Literals.prefix))
         {
@@ -31,19 +31,19 @@ public class FormulaParserService : IFormulaParserService
 
                 var expression = formula[Literals.prefixLength..];
                 var tokens = _formulaTokenizer.Tokenize(expression);
-                return EvaluateExpression(tokens);
+                return EvaluateExpression(tokens, ref errorMessage);
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Formula evaluation error: {e.Message}");
-                return "#ERROR!";
+                Trace.WriteLine($"Formula evaluation error: {e.Message}");
+                return Literals.errorMessage;
             }
         }
 
         return formula;
     }
 
-    private string EvaluateExpression(List<Token> tokens)
+    private string EvaluateExpression(List<Token> tokens, ref string? errorMessage)
     {
         int idx = 0;
         while (idx < tokens.Count)
@@ -94,6 +94,7 @@ public class FormulaParserService : IFormulaParserService
         catch (Exception e)
         {
             Trace.WriteLine(e);
+            errorMessage = e.Message;
             return Literals.errorMessage;
         }
     }

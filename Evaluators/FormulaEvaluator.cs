@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using ExcelClone.Evaluators.Tokens;
 using ExcelClone.Constants;
 using ExcelClone.Values;
 using ExcelClone.Utils;
+using ExcelClone.Resources.Localization;
 
 namespace ExcelClone.Evaluators
 {
@@ -16,7 +16,10 @@ namespace ExcelClone.Evaluators
             CellValue result = parser.ParseExpression();
 
             if (!parser.IsAtEnd())
-                throw new Exception($"Unexpected token '{parser.Current?.Value}' at the end of expression");
+                throw new Exception(DataProcessor.FormatResource(
+                    AppResources.UnexpectedTokenEOE,
+                    ("Token", parser.Current?.Value ?? "")
+                ));
 
             return result;
         }
@@ -50,7 +53,13 @@ namespace ExcelClone.Evaluators
             private Token Consume(TokenType type, string? value = null)
             {
                 if (!Match(type, value))
-                    throw new Exception($"Expected {type}{(value != null ? $" '{value}'" : "")}, found '{Current?.Value}'");
+                    throw new Exception(DataProcessor.FormatResource(
+                        AppResources.UnexpectedValue,
+                        ("Type", type),
+                        ("ExpectedValue", value != null ? $" '{value}'" : ""),
+                        ("RealValue", Current?.Value ?? "")
+                    ));
+                    
                 return _tokens[_pos - 1];
             }
 
@@ -119,7 +128,10 @@ namespace ExcelClone.Evaluators
                 if (Functions.operatorFunctions.TryGetValue(op, out var func))
                     return func(left, right);
 
-                throw new Exception($"Unknown operator or infix function '{op}'");
+                throw new Exception(DataProcessor.FormatResource(
+                    AppResources.UnknownInfixFunction,
+                    ("FunctionName", op)
+                ));
             }
 
             // Unary +/-
@@ -137,7 +149,12 @@ namespace ExcelClone.Evaluators
             // Primary: number, parentheses, prefix function
             private CellValue ParsePrimary()
             {
-                if (IsAtEnd()) throw new Exception("Unexpected end of expression");
+                if (IsAtEnd())
+                {
+                    throw new Exception(DataProcessor.FormatResource(
+                        AppResources.UnexpectedEOE
+                    ));
+                }
                 Token token = Current!;
 
                 // Number
@@ -173,7 +190,10 @@ namespace ExcelClone.Evaluators
                     return ParsePrefixFunction(name);
                 }
 
-                throw new Exception($"Unexpected token '{token.Value}'");
+                throw new Exception(DataProcessor.FormatResource(
+                    AppResources.UnexpectedToken,
+                    ("Token", token.Value)
+                ));
             }
 
             // Prefix function parser: e.g., SUM(1,2)
@@ -200,7 +220,10 @@ namespace ExcelClone.Evaluators
                 if (Functions.prefixFunctions.TryGetValue(name, out var func))
                     return func(args);
 
-                throw new Exception($"Unknown prefix function '{name}'");
+                throw new Exception(DataProcessor.FormatResource(
+                    AppResources.UnknownPrefixFunction,
+                    ("FunctionName", name)
+                ));
             }
         }
     }

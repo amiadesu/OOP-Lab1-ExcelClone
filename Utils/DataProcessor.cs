@@ -24,4 +24,14 @@ public static class DataProcessor
 
         return s;
     }
+
+    public static string FormatResource(string resource, params (string key, object value)[] parameters)
+    {
+        string result = resource;
+        foreach (var (key, value) in parameters)
+        {
+            result = result.Replace($"{{{key}}}", value?.ToString() ?? "");
+        }
+        return result;
+    }
 }
