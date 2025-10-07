@@ -10,7 +10,7 @@ using ExcelClone.Resources.Localization;
 
 namespace ExcelClone.Evaluators.Tokens;
 
-public class FormulaTokenizer
+public class FormulaTokenizer : IFormulaTokenizer
 {
     private enum TokenParserState
     {
