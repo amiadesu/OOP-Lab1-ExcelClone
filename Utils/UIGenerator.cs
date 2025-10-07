@@ -25,7 +25,7 @@ public static class UIGenerator
             VerticalTextAlignment = TextAlignment.Center,
             Padding = new Thickness(2, 0, 2, 0)
         };
-        
+
         var border = new Border
         {
             Stroke = Colors.Black,
@@ -85,5 +85,19 @@ public static class UIGenerator
         rowLayout.Children.Add(header);
 
         return header;
+    }
+
+    public static Button GenerateRecentFileButton(string fileName, ref VerticalStackLayout verticalStackLayout)
+    {
+        var button = new Button
+        {
+            Text = fileName,
+            BackgroundColor = Colors.Gray,
+            HeightRequest = 40
+        };
+
+        verticalStackLayout.Children.Add(button);
+
+        return button;
     }
 }
