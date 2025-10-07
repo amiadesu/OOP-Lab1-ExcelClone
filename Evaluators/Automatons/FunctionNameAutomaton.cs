@@ -53,7 +53,7 @@ public class FunctionNameAutomaton : IAutomaton
 
     private void EvaluateInput(char input)
     {
-        if (this._inner_state == 2)
+        if (this._state == AutomatonState.Rejecting)
         {
             return;
         }
@@ -78,6 +78,11 @@ public class FunctionNameAutomaton : IAutomaton
                 }
                 break;
         }
+        UpdateState();
+    }
+
+    private void UpdateState()
+    {
         if (this._inner_state == 2)
         {
             this._state = AutomatonState.Rejecting;
