@@ -14,7 +14,7 @@ public enum CellValueType
     GeneralError
 }
 
-public class CellValue : IComparable<CellValue>
+public sealed class CellValue : IComparable<CellValue>
 {
     public CellValueType Type { get; set; }
 

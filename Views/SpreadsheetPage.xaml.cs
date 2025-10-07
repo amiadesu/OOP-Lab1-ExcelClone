@@ -37,6 +37,7 @@ public partial class SpreadsheetPage : ContentPage
         InitializeComponent();
         _formulaTokenizer = new FormulaTokenizer();
         _cellNameService = new CellNameService();
+        _spreadsheet = new Spreadsheet(_currentColumns, _currentRows, _formulaTokenizer, _cellNameService);
         GenerateExcelGrid(true);
     }
 
@@ -226,7 +227,7 @@ public partial class SpreadsheetPage : ContentPage
 
                 if (excelCell is null)
                 {
-                    Trace.WriteLine($"Cell {cellAddress} is unexpectedly empty");
+                    Trace.TraceError($"Cell {cellAddress} is unexpectedly empty");
                     continue;
                 }
 
@@ -254,7 +255,7 @@ public partial class SpreadsheetPage : ContentPage
 
         if (cellObject is null)
         {
-            Trace.WriteLine($"Cell {_activeCellName} is unexpectedly empty");
+            Trace.TraceError($"Cell {_activeCellName} is unexpectedly empty");
             return;
         }
 

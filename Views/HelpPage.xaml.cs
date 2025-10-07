@@ -16,12 +16,12 @@ public partial class HelpPage : ContentPage {
         InitializeComponent();
     }
 
-    private async void OnHomePageClicked(object sender, EventArgs e)
+    private static async void OnHomePageClicked(object sender, EventArgs e)
     {
         await Shell.Current.Navigation.PushAsync(new StartingPage());
     }
     
-    private async void OnOpenSpreadsheetClicked(object sender, EventArgs e)
+    private static async void OnOpenSpreadsheetClicked(object sender, EventArgs e)
     {
         await Shell.Current.Navigation.PushAsync(new SpreadsheetPage());
     }

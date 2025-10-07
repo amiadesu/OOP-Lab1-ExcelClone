@@ -9,7 +9,7 @@ public partial class App : Application
 		InitializeComponent();
 	}
 
-	protected override Window CreateWindow(IActivationState? activationState = null)
+	protected override Window CreateWindow(IActivationState? activationState)
 	{
 		var startingPage = new AppShell();
 

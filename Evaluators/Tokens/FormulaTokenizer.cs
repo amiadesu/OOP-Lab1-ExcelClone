@@ -45,7 +45,7 @@ public class FormulaTokenizer : IFormulaTokenizer
         {
             char c = expression[position];
 
-            Trace.WriteLine($"{position}, {c}");
+            Trace.TraceInformation($"{position}, {c}");
 
             switch (state)
             {
@@ -86,7 +86,7 @@ public class FormulaTokenizer : IFormulaTokenizer
         }
 
         foreach (var token in tokens) {
-            Trace.WriteLine($"{token.Type}, {token.Value}");
+            Trace.TraceInformation($"{token.Type}, {token.Value}");
         }
 
         return tokens;
