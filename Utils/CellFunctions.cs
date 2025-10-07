@@ -21,7 +21,7 @@ public static class CellFunctions
     {
         if (right == 0)
         {
-            throw new Exception(DataProcessor.FormatResource(
+            throw new DivideByZeroException(DataProcessor.FormatResource(
                 AppResources.CannotDivideBy0
             ));
         }
@@ -42,7 +42,7 @@ public static class CellFunctions
     {
         if (right == 0)
         {
-            throw new Exception(DataProcessor.FormatResource(
+            throw new DivideByZeroException(DataProcessor.FormatResource(
                 AppResources.CannotDivideBy0
             ));
         }
@@ -53,7 +53,7 @@ public static class CellFunctions
     {
         if (right == 0)
         {
-            throw new Exception(DataProcessor.FormatResource(
+            throw new DivideByZeroException(DataProcessor.FormatResource(
                 AppResources.CannotDivideBy0
             ));
         }
@@ -121,7 +121,7 @@ public static class CellFunctions
     {
         if (args.Length != 2)
         {
-            throw new Exception(DataProcessor.FormatResource(
+            throw new ArgumentException(DataProcessor.FormatResource(
                 AppResources.ExpectsExactlyNArguments,
                 ("FunctionName", "MIN"),
                 ("Count", 2)
@@ -134,7 +134,7 @@ public static class CellFunctions
     {
         if (args.Length != 2)
         {
-            throw new Exception(DataProcessor.FormatResource(
+            throw new ArgumentException(DataProcessor.FormatResource(
                 AppResources.ExpectsExactlyNArguments,
                 ("FunctionName", "MAX"),
                 ("Count", 2)
@@ -157,7 +157,7 @@ public static class CellFunctions
     {
         if (args.Length != 1)
         {
-            throw new Exception(DataProcessor.FormatResource(
+            throw new ArgumentException(DataProcessor.FormatResource(
                 AppResources.ExpectsExactlyNArguments,
                 ("FunctionName", "INC"),
                 ("Count", 1)
@@ -170,7 +170,7 @@ public static class CellFunctions
     {
         if (args.Length != 1)
         {
-            throw new Exception(DataProcessor.FormatResource(
+            throw new ArgumentException(DataProcessor.FormatResource(
                 AppResources.ExpectsExactlyNArguments,
                 ("FunctionName", "DEC"),
                 ("Count", 1)
@@ -183,7 +183,7 @@ public static class CellFunctions
     {
         if (args.Length != 1)
         {
-            throw new Exception(DataProcessor.FormatResource(
+            throw new ArgumentException(DataProcessor.FormatResource(
                 AppResources.ExpectsExactlyNArguments,
                 ("FunctionName", "NOT"),
                 ("Count", 1)
