@@ -10,6 +10,7 @@ using ExcelClone.Components;
 using ExcelClone.Resources.Localization;
 using ExcelClone.Services;
 using ExcelClone.Utils;
+using ExcelClone.Evaluators.Tokens;
 
 namespace ExcelClone.FileSystem;
 
@@ -29,8 +30,8 @@ public static class TableFileService
             int row = i % spreadsheet.Rows;
 
             string cellName = spreadsheet.cellNameService.GetCellName(col, row);
-            var cell = spreadsheet.GetCell(cellName);
-            string formula = cell?.Formula ?? string.Empty;
+            var cellObject = spreadsheet.GetCell(cellName);
+            string formula = cellObject?.cell.Formula ?? string.Empty;
             result.AppendLine(formula);
         }
 
@@ -48,7 +49,7 @@ public static class TableFileService
         );
     }
 
-    public static Spreadsheet Load(string path, IFormulaParserService parser, ICellNameService nameService)
+    public static Spreadsheet Load(string path, IFormulaTokenizer tokenizer, ICellNameService nameService)
     {
         using var reader = new StreamReader(path);
 
@@ -71,7 +72,7 @@ public static class TableFileService
             ));
         }
 
-        var spreadsheet = new Spreadsheet(columns, rows, parser, nameService);
+        var spreadsheet = new Spreadsheet(columns, rows, tokenizer, nameService);
 
         // Read cell formulas
         int i = 0;
@@ -84,8 +85,7 @@ public static class TableFileService
 
             if (!string.IsNullOrEmpty(line))
             {
-                string? errorMessage = "";
-                spreadsheet.SetCellValue(cellName, line, ref errorMessage);
+                spreadsheet.SetCellValue(cellName, line);
             }
 
             i++;

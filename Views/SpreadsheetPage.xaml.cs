@@ -13,6 +13,9 @@ using ExcelClone.Utils;
 using ExcelClone.Resources.Localization;
 using ExcelClone.Constants;
 using Windows.ApplicationModel.VoiceCommands;
+using ExcelClone.Evaluators.Tokens;
+using System.Linq;
+using ExcelClone.Values;
 
 namespace ExcelClone.Views;
 
@@ -24,15 +27,15 @@ public partial class SpreadsheetPage : ContentPage
     private readonly string _fileName = Literals.defaultFileName;
 
     private Spreadsheet _spreadsheet;
-    private ExcelCell? _activeCell;
+    private string _activeCellName = "";
     private readonly Dictionary<string, Label> _cellControls = new Dictionary<string, Label>();
-    private readonly IFormulaParserService _formulaParserService;
+    private readonly IFormulaTokenizer _formulaTokenizer;
     private readonly ICellNameService _cellNameService;
 
     public SpreadsheetPage()
     {
         InitializeComponent();
-        _formulaParserService = new FormulaParserService();
+        _formulaTokenizer = new FormulaTokenizer();
         _cellNameService = new CellNameService();
         GenerateExcelGrid(true);
     }
@@ -40,9 +43,9 @@ public partial class SpreadsheetPage : ContentPage
     public SpreadsheetPage(string tablePath, string tableFileName)
     {
         InitializeComponent();
-        _formulaParserService = new FormulaParserService();
+        _formulaTokenizer = new FormulaTokenizer();
         _cellNameService = new CellNameService();
-        _spreadsheet = TableFileService.Load(tablePath, _formulaParserService, _cellNameService);
+        _spreadsheet = TableFileService.Load(tablePath, _formulaTokenizer, _cellNameService);
         _currentColumns = _spreadsheet.Columns;
         _currentRows = _spreadsheet.Rows;
         _fileName = tableFileName;
@@ -119,7 +122,7 @@ public partial class SpreadsheetPage : ContentPage
         _currentColumns = columns;
         _currentRows = rows;
 
-        _spreadsheet = new Spreadsheet(_currentColumns, _currentRows, _formulaParserService, _cellNameService);
+        _spreadsheet = new Spreadsheet(_currentColumns, _currentRows, _formulaTokenizer, _cellNameService);
     }
 
     private void GenerateExcelGrid(bool getNewDimensions = true)
@@ -227,7 +230,7 @@ public partial class SpreadsheetPage : ContentPage
                     continue;
                 }
 
-                var cell = UIGenerator.GenerateCell(excelCell, col, row, ref DataGridLayout);
+                var cell = UIGenerator.GenerateCell(excelCell.Value.value, col, row, ref DataGridLayout);
 
                 var tapGesture = new TapGestureRecognizer();
                 tapGesture.Tapped += (s, e) => OnCellTapped(cellAddress, cell);
@@ -240,23 +243,25 @@ public partial class SpreadsheetPage : ContentPage
 
     private void OnCellTapped(string cellAddress, Label cellControl)
     {
-        if (_activeCell != null && _cellControls.ContainsKey(_activeCell.Name))
+        if (!string.IsNullOrEmpty(_activeCellName) && _cellControls.ContainsKey(_activeCellName))
         {
-            _cellControls[_activeCell.Name].BackgroundColor = ColorConstants.cellBackgroundColor;
+            _cellControls[_activeCellName].BackgroundColor = ColorConstants.cellBackgroundColor;
         }
 
-        _activeCell = _spreadsheet.GetCell(cellAddress);
+        _activeCellName = cellAddress;
 
-        if (_activeCell is null)
+        var cellObject = _spreadsheet.GetCell(_activeCellName);
+
+        if (cellObject is null)
         {
-            Trace.WriteLine($"Cell {_activeCell} is unexpectedly empty");
+            Trace.WriteLine($"Cell {_activeCellName} is unexpectedly empty");
             return;
         }
 
         cellControl.BackgroundColor = ColorConstants.activeCellBackgroundColor;
 
         ActiveCellLabel.Text = cellAddress;
-        FormulaEntry.Text = _activeCell.Formula;
+        FormulaEntry.Text = cellObject.Value.cell.Formula;
         FormulaEntry.Focus();
     }
 
@@ -267,15 +272,13 @@ public partial class SpreadsheetPage : ContentPage
 
     private void ApplyCellValue()
     {
-        if (_activeCell == null) return;
+        if (string.IsNullOrEmpty(_activeCellName)) return;
 
         string inputValue = FormulaEntry.Text?.Trim() ?? "";
 
-        string? errorMessage = "";
+        string? errorMessage = _spreadsheet.SetCellValue(_activeCellName, inputValue);
 
-        _spreadsheet.SetCellValue(_activeCell.Name, inputValue, ref errorMessage);
-
-        if (errorMessage is not null && errorMessage.Length > 0)
+        if (!string.IsNullOrEmpty(errorMessage))
         {
             ShowError(
                 DataProcessor.FormatResource(
@@ -291,15 +294,12 @@ public partial class SpreadsheetPage : ContentPage
 
     private void UpdateAllCellDisplays()
     {
-        foreach (var cell in _spreadsheet.GetAllCells())
+        foreach (var cellObject in _spreadsheet.GetAllCells().Where(c => _cellControls.ContainsKey(c.name)))
         {
-            if (_cellControls.ContainsKey(cell.Name))
-            {
-                var cellControl = _cellControls[cell.Name];
+            var cellControl = _cellControls[cellObject.name];
 
-                UpdateCellText(ref cellControl, cell);
-                UpdateCellColor(ref cellControl, cell);
-            }
+            UpdateCellText(ref cellControl, cellObject.name);
+            UpdateCellColor(ref cellControl, cellObject.name);
         }
     }
 
@@ -338,31 +338,38 @@ public partial class SpreadsheetPage : ContentPage
         UpdateAllCellDisplays();
     }
 
-    private void UpdateCellText(ref Label cellObject, ExcelCell cellData)
+    private void UpdateCellText(ref Label cellLabel, string cellName)
     {
         if (DisplayModeSwitch.IsToggled)
         {
-            cellObject.Text = cellData.Formula;
+            cellLabel.Text = _spreadsheet.GetCellFormula(cellName);
         }
         else
         {
-            cellObject.Text = cellData.Value.ToString();
+            cellLabel.Text = _spreadsheet.GetCellDisplayValue(cellName);
         }
     }
 
-    private void UpdateCellColor(ref Label cellObject, ExcelCell cellData)
+    private void UpdateCellColor(ref Label cellLabel, string cellName)
     {
-        if (!string.IsNullOrEmpty(cellData.Formula))
+        var cellObject = _spreadsheet.GetCell(cellName);
+
+        if (cellObject is null)
         {
-            cellObject.TextColor = ColorConstants.formulaColor;
+            return;
         }
-        else if (!string.IsNullOrEmpty(cellData.Value))
+
+        if (!string.IsNullOrEmpty(cellObject.Value.cell.Formula))
         {
-            cellObject.TextColor = ColorConstants.valueColor;
+            cellLabel.TextColor = ColorConstants.formulaColor;
+        }
+        else if (!string.IsNullOrEmpty(cellObject.Value.value.Value))
+        {
+            cellLabel.TextColor = ColorConstants.valueColor;
         }
         else
         {
-            cellObject.TextColor = ColorConstants.emptyColor;
+            cellLabel.TextColor = ColorConstants.emptyColor;
         }
     }
 

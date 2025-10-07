@@ -13,72 +13,63 @@ namespace ExcelClone.Services;
 
 public class FormulaParserService : IFormulaParserService
 {
-    private Spreadsheet _currentSpreadsheet;
-    private string _currentCell;
+    private readonly Spreadsheet _currentSpreadsheet;
+    private readonly IFormulaTokenizer _formulaTokenizer;
 
-    private readonly FormulaTokenizer _formulaTokenizer = new FormulaTokenizer();
+    public FormulaParserService(Spreadsheet spreadsheet, IFormulaTokenizer tokenizer)
+    {
+        _currentSpreadsheet = spreadsheet;
+        _formulaTokenizer = tokenizer;
+    }
 
-    public CellValue Evaluate(string formula, string currentCell, Spreadsheet spreadsheet, ref string? errorMessage)
+    public (CellValue result, string? errorMessage) Evaluate(string formula)
     {
         if (formula.StartsWith(Literals.prefix))
         {
             try
             {
-                _currentSpreadsheet = spreadsheet;
-                _currentCell = currentCell;
-
                 var expression = formula[Literals.prefixLength..];
                 var tokens = _formulaTokenizer.Tokenize(expression);
-                return EvaluateExpression(tokens, ref errorMessage);
+                var result = EvaluateExpression(tokens);
+                return (new CellValue(result.result), result.errorMessage);
             }
             catch (Exception e)
             {
                 Trace.WriteLine($"Formula evaluation error: {e.Message}");
-                return Literals.errorMessage;
+                return (new CellValue(Literals.errorMessage), e.Message);
             }
         }
 
-        return formula;
+        return (new CellValue(formula), null);
     }
 
-    private string EvaluateExpression(List<Token> tokens, ref string? errorMessage)
+    private (string result, string? errorMessage) EvaluateExpression(List<Token> tokens)
     {
         int idx = 0;
         while (idx < tokens.Count)
         {
             Token token = tokens[idx];
 
-            switch (token.Type)
+            if (token.Type == TokenType.CellReference)
             {
-                case TokenType.CellReference:
-                    CellValue? realCellValue = _currentSpreadsheet.GetCellRealValue(token.Value);
-                    if (realCellValue is null)
-                    {
-                        return Literals.refErrorMessage;
-                    }
-                    if (StringChecker.IsSignedNumber(realCellValue.Value))
-                    {
-                        tokens[idx] = new Token
-                        {
-                            Type = TokenType.CellValue,
-                            CellValue = realCellValue,
-                            Position = token.Position
-                        };
-                    }
-                    else if (StringChecker.IsError(realCellValue.Value))
-                    {
-                        return Literals.errorMessage;
-                    }
-                    else
-                    {
-                        tokens[idx] = new Token
-                        {
-                            Type = TokenType.CellValue,
-                            CellValue = realCellValue,
-                            Position = token.Position
-                        };
-                    }
-                    break;
+                CellValue? realCellValue = _currentSpreadsheet.GetCellRealValue(token.Value);
+
+                if (realCellValue is null)
+                {
+                    return (Literals.refErrorMessage, null);
+                }
+
+                if (StringChecker.IsError(realCellValue.Value))
+                {
+                    return (Literals.errorMessage, null);
+                }
+
+                tokens[idx] = new Token
+                {
+                    Type = TokenType.CellValue,
+                    CellValue = realCellValue,
+                    Position = token.Position
+                };
             }
 
             idx++;
@@ -87,13 +78,12 @@ public class FormulaParserService : IFormulaParserService
         try
         {
             CellValue result = FormulaEvaluator.Evaluate(tokens);
-            return result;
+            return (result, null);
         }
         catch (Exception e)
         {
             Trace.WriteLine(e);
-            errorMessage = e.Message;
-            return Literals.errorMessage;
+            return (Literals.errorMessage, e.Message);
         }
     }
 }
