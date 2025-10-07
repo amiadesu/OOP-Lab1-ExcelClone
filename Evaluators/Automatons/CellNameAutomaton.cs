@@ -53,7 +53,7 @@ public class CellNameAutomaton : IAutomaton
 
     private void EvaluateInput(char input)
     {
-        if (this._inner_state == 3)
+        if (this._state == AutomatonState.Rejecting)
         {
             return;
         }
@@ -89,6 +89,11 @@ public class CellNameAutomaton : IAutomaton
                 }
                 break;
         }
+        UpdateState();
+    }
+
+    private void UpdateState()
+    {
         if (this._inner_state == 3)
         {
             this._state = AutomatonState.Rejecting;

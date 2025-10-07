@@ -18,8 +18,6 @@ public class FormulaParserService : IFormulaParserService
 
     private readonly FormulaTokenizer _formulaTokenizer = new FormulaTokenizer();
 
-    private readonly NumberAutomaton _numberAutomaton = new NumberAutomaton();
-
     public CellValue Evaluate(string formula, string currentCell, Spreadsheet spreadsheet, ref string? errorMessage)
     {
         if (formula.StartsWith(Literals.prefix))

@@ -12,6 +12,7 @@ using ExcelClone.FileSystem;
 using ExcelClone.Utils;
 using ExcelClone.Resources.Localization;
 using ExcelClone.Constants;
+using Windows.ApplicationModel.VoiceCommands;
 
 namespace ExcelClone.Views;
 
@@ -23,7 +24,7 @@ public partial class SpreadsheetPage : ContentPage
     private readonly string _fileName = Literals.defaultFileName;
 
     private Spreadsheet _spreadsheet;
-    private ExcelCell _activeCell;
+    private ExcelCell? _activeCell;
     private readonly Dictionary<string, Label> _cellControls = new Dictionary<string, Label>();
     private readonly IFormulaParserService _formulaParserService;
     private readonly ICellNameService _cellNameService;
@@ -123,13 +124,6 @@ public partial class SpreadsheetPage : ContentPage
 
     private void GenerateExcelGrid(bool getNewDimensions = true)
     {
-        var stopwatch = Stopwatch.StartNew();
-
-        ColumnHeadersLayout.Children.Clear();
-        RowHeadersLayout.Children.Clear();
-        DataGridLayout.Children.Clear();
-        _cellControls.Clear();
-
         if (getNewDimensions)
         {
             GetDimensionsAndGenerateSpreadsheet();
@@ -141,27 +135,27 @@ public partial class SpreadsheetPage : ContentPage
             UpdateDimensionsInputs();
         }
 
+        GenerateWithClock();
+    }
+
+    private void ClearEverything()
+    {
+        ColumnHeadersLayout.Children.Clear();
+        RowHeadersLayout.Children.Clear();
+        DataGridLayout.Children.Clear();
+        _cellControls.Clear();
+    }
+
+    private void GenerateGridWithErrorFetching()
+    {
         try
         {
+            ClearEverything();
+
             CreateColumnHeaders(_currentColumns);
             CreateRowHeaders(_currentRows);
 
-            StatusLabel.Text = DataProcessor.FormatResource(
-                AppResources.CreatingGrid,
-                ("Columns", _currentColumns),
-                ("Rows", _currentRows)
-            );
-
             CreateDataCells(_currentColumns, _currentRows);
-
-            stopwatch.Stop();
-            StatusLabel.Text = DataProcessor.FormatResource(
-                AppResources.GridCreated,
-                ("Columns", _currentColumns),
-                ("Rows", _currentRows),
-                ("TimeMs", stopwatch.ElapsedMilliseconds)
-            );
-            StatusLabel.TextColor = Colors.Green;
         }
         catch (Exception ex)
         {
@@ -173,6 +167,29 @@ public partial class SpreadsheetPage : ContentPage
             );
         }
     }
+    
+    private void GenerateWithClock()
+    {
+        var stopwatch = Stopwatch.StartNew();
+
+        StatusLabel.Text = DataProcessor.FormatResource(
+            AppResources.CreatingGrid,
+            ("Columns", _currentColumns),
+            ("Rows", _currentRows)
+        );
+
+        GenerateGridWithErrorFetching();
+
+        stopwatch.Stop();
+
+        StatusLabel.Text = DataProcessor.FormatResource(
+            AppResources.GridCreated,
+            ("Columns", _currentColumns),
+            ("Rows", _currentRows),
+            ("TimeMs", stopwatch.ElapsedMilliseconds)
+        );
+        StatusLabel.TextColor = Colors.Green;
+    }
 
     private void CreateColumnHeaders(int columns)
     {
@@ -180,7 +197,7 @@ public partial class SpreadsheetPage : ContentPage
         {
             string columnName = _cellNameService.GetColumnName(col);
 
-            var header = UIGenerator.GenerateColumnHeader(columnName, ref ColumnHeadersLayout);
+            UIGenerator.GenerateColumnHeader(columnName, ref ColumnHeadersLayout);
         }
     }
 
@@ -190,7 +207,7 @@ public partial class SpreadsheetPage : ContentPage
         {
             string rowName = _cellNameService.GetRowName(row);
 
-            var header = UIGenerator.GenerateRowHeader(rowName, ref RowHeadersLayout);
+            UIGenerator.GenerateRowHeader(rowName, ref RowHeadersLayout);
         }
     }
 
@@ -203,6 +220,12 @@ public partial class SpreadsheetPage : ContentPage
                 string cellAddress = _cellNameService.GetCellName(col, row);
 
                 var excelCell = _spreadsheet.GetCell(cellAddress);
+
+                if (excelCell is null)
+                {
+                    Trace.WriteLine($"Cell {cellAddress} is unexpectedly empty");
+                    continue;
+                }
 
                 var cell = UIGenerator.GenerateCell(excelCell, col, row, ref DataGridLayout);
 
@@ -223,6 +246,12 @@ public partial class SpreadsheetPage : ContentPage
         }
 
         _activeCell = _spreadsheet.GetCell(cellAddress);
+
+        if (_activeCell is null)
+        {
+            Trace.WriteLine($"Cell {_activeCell} is unexpectedly empty");
+            return;
+        }
 
         cellControl.BackgroundColor = ColorConstants.activeCellBackgroundColor;
 
@@ -269,19 +298,7 @@ public partial class SpreadsheetPage : ContentPage
                 var cellControl = _cellControls[cell.Name];
 
                 UpdateCellText(ref cellControl, cell);
-
-                if (!string.IsNullOrEmpty(cell.Formula))
-                {
-                    cellControl.TextColor = ColorConstants.formulaColor;
-                }
-                else if (!string.IsNullOrEmpty(cell.Value))
-                {
-                    cellControl.TextColor = ColorConstants.valueColor;
-                }
-                else
-                {
-                    cellControl.TextColor = ColorConstants.emptyColor;
-                }
+                UpdateCellColor(ref cellControl, cell);
             }
         }
     }
@@ -330,6 +347,22 @@ public partial class SpreadsheetPage : ContentPage
         else
         {
             cellObject.Text = cellData.Value.ToString();
+        }
+    }
+
+    private void UpdateCellColor(ref Label cellObject, ExcelCell cellData)
+    {
+        if (!string.IsNullOrEmpty(cellData.Formula))
+        {
+            cellObject.TextColor = ColorConstants.formulaColor;
+        }
+        else if (!string.IsNullOrEmpty(cellData.Value))
+        {
+            cellObject.TextColor = ColorConstants.valueColor;
+        }
+        else
+        {
+            cellObject.TextColor = ColorConstants.emptyColor;
         }
     }
 

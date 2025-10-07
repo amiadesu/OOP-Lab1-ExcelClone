@@ -15,8 +15,8 @@ public static class Literals
     public const int cellWidth = 100;
     public const int cellHeight = 25;
 
-    public static string prefix = "=";
-    public static int prefixLength = prefix.Length;
+    public const string prefix = "=";
+    public static readonly int prefixLength = prefix.Length;
 
     // Mask with 12 digits after dot
     public const string doubleFormatMask = "0.############";

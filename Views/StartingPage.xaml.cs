@@ -82,15 +82,9 @@ public partial class StartingPage : ContentPage
 
             foreach (var entry in entries)
             {
-                var button = new Button
-                {
-                    Text = entry.FileName,
-                    BackgroundColor = Colors.Gray,
-                    HeightRequest = 40
-                };
-                button.Clicked += (async (sender, e) => await OpenFile(entry.FileName, entry.FilePath));
+                var button = UIGenerator.GenerateRecentFileButton(entry.FileName, ref RecentItemsContainer);
 
-                RecentItemsContainer.Children.Add(button);
+                button.Clicked += (async (sender, e) => await OpenFile(entry.FileName, entry.FilePath));
             }
         }
     }

@@ -10,12 +10,10 @@ namespace ExcelClone.Services
         // Column naming
         string GetColumnName(int columnIndex);
         int GetColumnIndex(string columnName);
-        bool IsValidColumnName(string columnName);
         
         // Row naming
         string GetRowName(int rowIndex);
         int GetRowIndex(string rowName);
-        bool IsValidRowName(string rowName);
         
         // Range operations
         string GetCellRange(string startCell, string endCell);

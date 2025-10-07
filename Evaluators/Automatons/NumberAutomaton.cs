@@ -52,7 +52,7 @@ public class NumberAutomaton : IAutomaton
 
     private void EvaluateInput(char input)
     {
-        if (this._inner_state == 3)
+        if (this._state == AutomatonState.Rejecting)
         {
             return;
         }
@@ -92,6 +92,11 @@ public class NumberAutomaton : IAutomaton
                 }
                 break;
         }
+        UpdateState();
+    }
+
+    private void UpdateState()
+    {
         if (this._inner_state == 3)
         {
             this._state = AutomatonState.Rejecting;

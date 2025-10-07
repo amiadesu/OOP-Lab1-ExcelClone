@@ -4,225 +4,220 @@ using System.Linq;
 using ExcelClone.Resources.Localization;
 using ExcelClone.Utils;
 
-namespace ExcelClone.Services
+namespace ExcelClone.Services;
+
+public class CellNameService : ICellNameService
 {
-    public class CellNameService : ICellNameService
-    {        
-        public string GetCellName(int columnIndex, int rowIndex)
+    public string GetCellName(int columnIndex, int rowIndex)
+    {
+        ValidateColumnIndex(columnIndex);
+        ValidateRowIndex(rowIndex);
+
+        return $"{GetColumnName(columnIndex)}{GetRowName(rowIndex)}";
+    }
+
+    public (int columnIndex, int rowIndex) ParseCellName(string cellName)
+    {
+        ValidateCellName(cellName);
+
+        var columnPart = string.Concat(cellName.TakeWhile(char.IsLetter));
+        ValidateColumnName(columnPart);
+
+        var rowPart = string.Concat(cellName.SkipWhile(char.IsLetter));
+        ValidateRowName(rowPart);
+
+        int columnIndex = GetColumnIndex(columnPart);
+        int rowIndex = GetRowIndex(rowPart);
+
+        return (columnIndex, rowIndex);
+    }
+
+    public bool IsValidCellName(string cellName)
+    {
+        if (string.IsNullOrEmpty(cellName))
+            return false;
+
+        try
         {
-            if (columnIndex < 0 || rowIndex < 0)
-            {
-                throw new ArgumentException(
-                    DataProcessor.FormatResource(
-                        AppResources.ColumnAndRowIndicesMustBeNonNegative
-                    )
-                );
-            }
-            
-            return $"{GetColumnName(columnIndex)}{GetRowName(rowIndex)}";
+            ParseCellName(cellName);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public string GetColumnName(int columnIndex)
+    {
+        ValidateColumnIndex(columnIndex);
+
+        string columnName = "";
+        int index = columnIndex;
+
+        while (index >= 0)
+        {
+            columnName = (char)('A' + (index % 26)) + columnName;
+            index = (index / 26) - 1;
         }
 
-        public (int columnIndex, int rowIndex) ParseCellName(string cellName)
+        return columnName;
+    }
+
+    public int GetColumnIndex(string columnName)
+    {
+        ValidateColumnName(columnName);
+
+        int result = 0;
+        foreach (char c in columnName.ToUpper())
         {
-            if (string.IsNullOrEmpty(cellName))
+            if (c < 'A' || c > 'Z')
             {
                 throw new ArgumentException(
                     DataProcessor.FormatResource(
-                        AppResources.CellNameCannotBeEmpty
-                    )
-                );
-            }
-
-            var columnPart = string.Concat(cellName.TakeWhile(char.IsLetter));
-            var rowPart = string.Concat(cellName.SkipWhile(char.IsLetter));
-
-            if (string.IsNullOrEmpty(columnPart) || string.IsNullOrEmpty(rowPart))
-            {
-                throw new ArgumentException(
-                    DataProcessor.FormatResource(
-                        AppResources.InvalidCellNameFormat,
-                        ("CellName", cellName)
-                    )
-                );
-            }
-
-            int columnIndex = GetColumnIndex(columnPart);
-            int rowIndex = GetRowIndex(rowPart);
-
-            return (columnIndex, rowIndex);
-        }
-
-        public bool IsValidCellName(string cellName)
-        {
-            if (string.IsNullOrEmpty(cellName))
-                return false;
-
-            try
-            {
-                ParseCellName(cellName);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-        
-        public string GetColumnName(int columnIndex)
-        {
-            if (columnIndex < 0)
-            {
-                throw new ArgumentException(
-                    DataProcessor.FormatResource(
-                        AppResources.ColumnIndexMustBeNonNegative
-                    )
-                );
-            }
-
-            string columnName = "";
-            int index = columnIndex;
-
-            while (index >= 0)
-            {
-                columnName = (char)('A' + (index % 26)) + columnName;
-                index = (index / 26) - 1;
-            }
-
-            return columnName;
-        }
-
-        public int GetColumnIndex(string columnName)
-        {
-            if (string.IsNullOrEmpty(columnName))
-            {
-                throw new ArgumentException(
-                    DataProcessor.FormatResource(
-                        AppResources.ColumnNameCannotBeEmpty
+                        AppResources.InvalidCharacterInColumnName,
+                        ("Character", c)
                     )
                 );
             }
 
-            int result = 0;
-            foreach (char c in columnName.ToUpper())
-            {
-                if (c < 'A' || c > 'Z')
-                {
-                    throw new ArgumentException(
-                        DataProcessor.FormatResource(
-                            AppResources.InvalidCharacterInColumnName,
-                            ("Character", c)
-                        )
-                    );
-                }
-                
-                result = result * 26 + (c - 'A' + 1);
-            }
-            
-            return result - 1;
+            result = result * 26 + (c - 'A' + 1);
         }
 
-        public bool IsValidColumnName(string columnName)
-        {
-            if (string.IsNullOrEmpty(columnName))
-                return false;
+        return result - 1;
+    }
 
-            return columnName.All(c => char.IsLetter(c) && (c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z'));
-        }
-        
-        public string GetRowName(int rowIndex)
-        {
-            if (rowIndex < 0)
-            {
-                throw new ArgumentException(
-                    DataProcessor.FormatResource(
-                        AppResources.RowIndexMustBeNonNegative
-                    )
-                );
-            }
+    public string GetRowName(int rowIndex)
+    {
+        ValidateRowIndex(rowIndex);
 
-            return (rowIndex + 1).ToString();
+        return (rowIndex + 1).ToString();
+    }
+
+    public int GetRowIndex(string rowName)
+    {
+        ValidateRowName(rowName);
+
+        if (int.TryParse(rowName, out int rowNumber) && rowNumber >= 1)
+        {
+            return rowNumber - 1;
         }
 
-        public int GetRowIndex(string rowName)
+        throw new ArgumentException(
+            DataProcessor.FormatResource(
+                AppResources.InvalidRowName,
+                ("RowName", rowName)
+            )
+        );
+    }
+
+    public string GetCellRange(string startCell, string endCell)
+    {
+        var (startCol, startRow) = ParseCellName(startCell);
+        var (endCol, endRow) = ParseCellName(endCell);
+
+        return $"{startCell}:{endCell}";
+    }
+
+    public string[] ParseCellRange(string range)
+    {
+        if (string.IsNullOrEmpty(range))
+            return Array.Empty<string>();
+
+        var parts = range.Split(':');
+        if (parts.Length != 2)
         {
-            if (string.IsNullOrEmpty(rowName))
-            {
-                throw new ArgumentException(
-                    DataProcessor.FormatResource(
-                        AppResources.RowNameCannotBeEmpty
-                    )
-                );
-            }
-
-            if (int.TryParse(rowName, out int rowNumber) && rowNumber >= 1)
-            {
-                return rowNumber - 1;
-            }
-
             throw new ArgumentException(
                 DataProcessor.FormatResource(
-                    AppResources.InvalidRowName,
-                    ("RowName", rowName)
+                    AppResources.RangeMustBeInFormat
                 )
             );
         }
 
-        public bool IsValidRowName(string rowName)
-        {
-            if (string.IsNullOrEmpty(rowName))
-                return false;
+        string startCell = parts[0].Trim();
+        string endCell = parts[1].Trim();
 
-            return int.TryParse(rowName, out int result) && result >= 1;
-        }
-        
-        public string GetCellRange(string startCell, string endCell)
+        if (!IsValidCellName(startCell) || !IsValidCellName(endCell))
         {
-            var (startCol, startRow) = ParseCellName(startCell);
-            var (endCol, endRow) = ParseCellName(endCell);
-
-            return $"{startCell}:{endCell}";
+            throw new ArgumentException(
+                DataProcessor.FormatResource(
+                    AppResources.InvalidCellNamesInRange
+                )
+            );
         }
 
-        public string[] ParseCellRange(string range)
+        var (startCol, startRow) = ParseCellName(startCell);
+        var (endCol, endRow) = ParseCellName(endCell);
+
+        var cells = new List<string>();
+        for (int row = startRow; row <= endRow; row++)
         {
-            if (string.IsNullOrEmpty(range))
-                return Array.Empty<string>();
-
-            var parts = range.Split(':');
-            if (parts.Length != 2)
+            for (int col = startCol; col <= endCol; col++)
             {
-                throw new ArgumentException(
-                    DataProcessor.FormatResource(
-                        AppResources.RangeMustBeInFormat
-                    )
-                );
+                cells.Add(GetCellName(col, row));
             }
+        }
 
-            string startCell = parts[0].Trim();
-            string endCell = parts[1].Trim();
+        return cells.ToArray();
+    }
 
-            if (!IsValidCellName(startCell) || !IsValidCellName(endCell))
-            {
-                throw new ArgumentException(
-                    DataProcessor.FormatResource(
-                        AppResources.InvalidCellNamesInRange
-                    )
-                );
-            }
+    private void ValidateCellName(string cellName)
+    {
+        if (string.IsNullOrEmpty(cellName))
+        {
+            throw new ArgumentException(
+                DataProcessor.FormatResource(
+                    AppResources.CellNameCannotBeEmpty
+                )
+            );
+        }
+    }
 
-            var (startCol, startRow) = ParseCellName(startCell);
-            var (endCol, endRow) = ParseCellName(endCell);
+    private void ValidateColumnName(string columnName)
+    {
+        if (string.IsNullOrEmpty(columnName))
+        {
+            throw new ArgumentException(
+                DataProcessor.FormatResource(
+                    AppResources.ColumnNameCannotBeEmpty
+                )
+            );
+        }
+    }
 
-            var cells = new List<string>();
-            for (int row = startRow; row <= endRow; row++)
-            {
-                for (int col = startCol; col <= endCol; col++)
-                {
-                    cells.Add(GetCellName(col, row));
-                }
-            }
+    private void ValidateColumnIndex(int columnIndex)
+    {
+        if (columnIndex < 0)
+        {
+            throw new ArgumentException(
+                DataProcessor.FormatResource(
+                    AppResources.ColumnIndexMustBeNonNegative
+                )
+            );
+        }
+    }
 
-            return cells.ToArray();
+    public void ValidateRowName(string rowName)
+    {
+        if (string.IsNullOrEmpty(rowName))
+        {
+            throw new ArgumentException(
+                DataProcessor.FormatResource(
+                    AppResources.RowNameCannotBeEmpty
+                )
+            );
+        }
+    }
+
+    private void ValidateRowIndex(int rowIndex)
+    {
+        if (rowIndex < 0)
+        {
+            throw new ArgumentException(
+                DataProcessor.FormatResource(
+                    AppResources.RowIndexMustBeNonNegative
+                )
+            );
         }
     }
 }
