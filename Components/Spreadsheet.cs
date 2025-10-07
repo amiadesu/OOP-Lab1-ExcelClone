@@ -8,7 +8,7 @@ namespace ExcelClone.Components
 {
     public class Spreadsheet
     {
-        private Dictionary<string, ExcelCell> _cells;
+        private readonly Dictionary<string, ExcelCell> _cells;
         private readonly IFormulaParserService _formulaParser;
         public readonly ICellNameService cellNameService;
         public int Columns { get; private set; }
