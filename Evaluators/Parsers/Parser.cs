@@ -7,6 +7,7 @@ using ExcelClone.Utils;
 using ExcelClone.Resources.Localization;
 using ExcelClone.Exceptions;
 using ExcelClone.Components;
+using System.Diagnostics;
 
 namespace ExcelClone.Evaluators.Parsers;
 
@@ -155,8 +156,10 @@ public class Parser : IParser
 
         if (token.Type == TokenType.CellReference)
         {
+            Next();
             if (_reader is null)
             {
+                Trace.TraceError("Unexpected null reader");
                 return new CellValue(Literals.refErrorMessage);
             }
 
