@@ -162,6 +162,17 @@ public class CellNameService : ICellNameService
         return cells.ToArray();
     }
 
+    public IEnumerable<string> CellNames(int cols, int rows)
+    {
+        for (int i = 0; i < cols; i++)
+        {
+            for (int j = 0; j < rows; j++)
+            {
+                yield return GetCellName(i, j);
+            }
+        }
+    }
+
     private static void ValidateCellName(string cellName)
     {
         ValidateCellNameNotEmpty(cellName);
@@ -209,7 +220,7 @@ public class CellNameService : ICellNameService
         }
     }
 
-    public static void ValidateRowName(string rowName)
+    private static void ValidateRowName(string rowName)
     {
         if (string.IsNullOrEmpty(rowName))
         {
