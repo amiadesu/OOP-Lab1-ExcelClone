@@ -4,25 +4,43 @@ using ExcelClone.Services;
 using ExcelClone.Constants;
 using ExcelClone.Values;
 using ExcelClone.Evaluators.Tokens;
+using ExcelClone.Utils;
+using Microsoft.Maui.Controls;
 
 namespace ExcelClone.Components;
 
-public class Spreadsheet
+public class Spreadsheet : ICellStorage
 {
-    private readonly Dictionary<string, (ExcelCell cell, CellValue value, string name)> _cells;
-    private readonly IFormulaParserService _formulaParser;
-    public readonly ICellNameService cellNameService;
-    public int Columns { get; private set; }
-    public int Rows { get; private set; }
+    private readonly Dictionary<string, (SpreadsheetCell cell, string name)> _cells;
+    private readonly ICellNameService _cellNameService;
+    public int Columns { get; private set; } = 0;
+    public int Rows { get; private set; } = 0;
 
-    public Spreadsheet(int columns, int rows, IFormulaTokenizer tokenizer, ICellNameService cellNameService)
+    public Spreadsheet(ICellNameService cellNameService)
     {
-        this.cellNameService = cellNameService;
+        this._cellNameService = cellNameService;
+        _cells = new Dictionary<string, (SpreadsheetCell cell, string name)>();
+    }
+
+    public void CreateNewCellStorage(int columns, int rows)
+    {
         Columns = columns;
         Rows = rows;
-        _formulaParser = new FormulaParserService(this, tokenizer);
-        _cells = new Dictionary<string, (ExcelCell cell, CellValue value, string name)>();
+        Clear();
         InitializeCells();
+    }
+
+    public int GetColumns()
+    {
+        return Columns;
+    }
+    public int GetRows()
+    {
+        return Rows;
+    }
+
+    public string GetCellName(int col, int row) {
+        return _cellNameService.GetCellName(col, row);
     }
 
     private void InitializeCells()
@@ -31,94 +49,59 @@ public class Spreadsheet
         {
             for (int col = 0; col < Columns; col++)
             {
-                string cellName = cellNameService.GetCellName(col, row);
-                _cells[cellName] = (new ExcelCell(), new CellValue(CellValueType.Text), cellName);
+                string cellName = _cellNameService.GetCellName(col, row);
+                _cells[cellName] = (new SpreadsheetCell(), cellName);
             }
         }
     }
 
-    public (ExcelCell cell, CellValue value, string name)? GetCell(string cellName)
+    private void Clear()
     {
-        return _cells.ContainsKey(cellName.ToUpper()) ? _cells[cellName.ToUpper()] : null;
+        _cells.Clear();
     }
 
-    public string? SetCellValue(string cellName, string value)
+    public (SpreadsheetCell cell, string name)? GetCell(string cellName)
     {
-        if (!_cells.ContainsKey(cellName.ToUpper()))
-            return null;
-
-        var cellObject = _cells[cellName.ToUpper()];
-
-        string? errorMessage = null;
-
-        if (value.StartsWith(Literals.prefix))
-        {
-            cellObject.cell.Formula = value;
-
-            var result = _formulaParser.Evaluate(value);
-            cellObject.value.Value = result.result;
-            
-            errorMessage = result.errorMessage;
-        }
-        else
-        {
-            cellObject.cell.Formula = value;
-            cellObject.value.Value = value;
-        }
-
-        // Recalculate cells
-        string? possibleError = RecalculateCells();
-        if (possibleError is not null && errorMessage is null)
-        {
-            errorMessage = possibleError;
-        }
-
-        return errorMessage;
+        return CellExists(cellName) ? _cells[cellName.ToUpper()] : null;
     }
 
-    public string GetCellDisplayValue(string cellName)
+    public void SetCellFormula(string cellReference, string formula) {
+        if (!CellExists(cellReference))
+            return;
+
+        var cellObject = _cells[cellReference.ToUpper()];
+        
+        cellObject.cell.SetFormula(formula);
+    }
+    public void SetCellValue(string cellReference, CellValue value)
     {
-        var cellObject = GetCell(cellName);
-        return cellObject?.value.Value.ToString() ?? Literals.refErrorMessage;
+        if (!CellExists(cellReference))
+            return;
+
+        var cellObject = _cells[cellReference.ToUpper()];
+        
+        cellObject.cell.SetValue(value);
     }
 
-    public string GetCellFormula(string cellName)
+    public string GetCellDisplayValue(string cellReference)
     {
-        var cellObject = GetCell(cellName);
+        var cellObject = GetCell(cellReference);
+        return cellObject?.cell.Value.ToString() ?? Literals.refErrorMessage;
+    }
+
+    public CellValue? GetCellValue(string cellReference)
+    {
+        var cellObject = GetCell(cellReference);
+        return cellObject?.cell.Value ?? null;
+    }
+
+    public string GetCellFormula(string cellReference)
+    {
+        var cellObject = GetCell(cellReference);
         return cellObject?.cell.Formula ?? "";
     }
 
-    public CellValue? GetCellRealValue(string cellName)
-    {
-        var cellObject = GetCell(cellName);
-        return cellObject?.value ?? null;
-    }
-
-    private string? RecalculateCells()
-    {
-        string? errorMessage = null;
-
-        // Recalculate all formula cells
-        foreach (var cellObject in _cells.Values.Where(c => !string.IsNullOrEmpty(c.cell.Formula)))
-        {
-            var result = _formulaParser.Evaluate(cellObject.cell.Formula);
-            cellObject.value.Value = result.result;
-
-            if (result.errorMessage is not null)
-            {
-                errorMessage = result.errorMessage;
-            }
-        }
-
-        return errorMessage;
-    }
-
-    public List<(ExcelCell cell, CellValue value, string name)> GetAllCells()
-    {
-        return _cells.Values.ToList();
-    }
-
-    public bool CellExists(string cellName)
+    private bool CellExists(string cellName)
     {
         return _cells.ContainsKey(cellName.ToUpper());
     }

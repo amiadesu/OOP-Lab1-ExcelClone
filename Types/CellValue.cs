@@ -49,6 +49,7 @@ public sealed class CellValue : IComparable<CellValue>
     {
         Type = CellValueType.Number;
         NumberValue = value;
+        _value = this.ToString();
     }
 
     public CellValue(string value)
@@ -60,6 +61,7 @@ public sealed class CellValue : IComparable<CellValue>
     {
         Type = CellValueType.Boolean;
         NumberValue = value ? 1 : 0;
+        _value = this.ToString();
     }
 
     // Comparisons
