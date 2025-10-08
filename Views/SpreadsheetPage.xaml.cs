@@ -13,6 +13,11 @@ using ExcelClone.Utils;
 using ExcelClone.Resources.Localization;
 using ExcelClone.Constants;
 using Windows.ApplicationModel.VoiceCommands;
+using ExcelClone.Evaluators.Tokens;
+using System.Linq;
+using ExcelClone.Values;
+using ExcelClone.Evaluators;
+using ExcelClone.Evaluators.Parsers;
 
 namespace ExcelClone.Views;
 
@@ -23,29 +28,62 @@ public partial class SpreadsheetPage : ContentPage
     private int _currentRows = 0;
     private readonly string _fileName = Literals.defaultFileName;
 
-    private Spreadsheet _spreadsheet;
-    private ExcelCell? _activeCell;
+    private string _activeCellName = "";
     private readonly Dictionary<string, Label> _cellControls = new Dictionary<string, Label>();
-    private readonly IFormulaParserService _formulaParserService;
+    private readonly ICellStorage _spreadsheet;
+    private readonly IDependencyTree _dependencyTree;
+    private readonly IFormulaTokenizer _formulaTokenizer;
+    private readonly IFormulaEvaluator _formulaEvaluator;
+    private readonly IParser _parser;
+    private readonly IFormulaParserService _formulaParser;
     private readonly ICellNameService _cellNameService;
+    private readonly ISpreadsheetService _spreadsheetService;
 
     public SpreadsheetPage()
     {
         InitializeComponent();
-        _formulaParserService = new FormulaParserService();
+
         _cellNameService = new CellNameService();
+        _spreadsheet = new Spreadsheet(_cellNameService);
+
+        _dependencyTree = new DependencyTree();
+
+        _parser = new Parser(_spreadsheet);
+
+        _formulaTokenizer = new FormulaTokenizer();
+        _formulaEvaluator = new FormulaEvaluator(_parser);
+
+        _formulaParser = new FormulaParserService(_formulaTokenizer, _formulaEvaluator);
+
+        _spreadsheetService = new SpreadsheetService(_spreadsheet, _dependencyTree, _formulaParser);
+
         GenerateExcelGrid(true);
     }
 
     public SpreadsheetPage(string tablePath, string tableFileName)
     {
         InitializeComponent();
-        _formulaParserService = new FormulaParserService();
+
         _cellNameService = new CellNameService();
-        _spreadsheet = TableFileService.Load(tablePath, _formulaParserService, _cellNameService);
-        _currentColumns = _spreadsheet.Columns;
-        _currentRows = _spreadsheet.Rows;
+        _spreadsheet = TableFileService.Load(tablePath, _cellNameService);
+
+        _dependencyTree = new DependencyTree();
+
+        _parser = new Parser(_spreadsheet);
+
+        _formulaTokenizer = new FormulaTokenizer();
+        _formulaEvaluator = new FormulaEvaluator(_parser);
+
+        _formulaParser = new FormulaParserService(_formulaTokenizer, _formulaEvaluator);
+
+        _spreadsheetService = new SpreadsheetService(_spreadsheet, _dependencyTree, _formulaParser);
+
+        _currentColumns = _spreadsheet.GetColumns();
+        _currentRows = _spreadsheet.GetRows();
         _fileName = tableFileName;
+
+        RecalculateAllCells();
+
         GenerateExcelGrid(false);
     }
 
@@ -119,7 +157,7 @@ public partial class SpreadsheetPage : ContentPage
         _currentColumns = columns;
         _currentRows = rows;
 
-        _spreadsheet = new Spreadsheet(_currentColumns, _currentRows, _formulaParserService, _cellNameService);
+        _spreadsheet.CreateNewCellStorage(_currentColumns, _currentRows);
     }
 
     private void GenerateExcelGrid(bool getNewDimensions = true)
@@ -130,8 +168,8 @@ public partial class SpreadsheetPage : ContentPage
         }
         else
         {
-            _currentColumns = _spreadsheet.Columns;
-            _currentRows = _spreadsheet.Rows;
+            _currentColumns = _spreadsheet.GetColumns();
+            _currentRows = _spreadsheet.GetRows();
             UpdateDimensionsInputs();
         }
 
@@ -219,15 +257,15 @@ public partial class SpreadsheetPage : ContentPage
             {
                 string cellAddress = _cellNameService.GetCellName(col, row);
 
-                var excelCell = _spreadsheet.GetCell(cellAddress);
+                var cellValue = _spreadsheet.GetCellValue(cellAddress);
 
-                if (excelCell is null)
+                if (cellValue is null)
                 {
-                    Trace.WriteLine($"Cell {cellAddress} is unexpectedly empty");
+                    Trace.TraceError($"Cell {cellAddress} is unexpectedly empty");
                     continue;
                 }
 
-                var cell = UIGenerator.GenerateCell(excelCell, col, row, ref DataGridLayout);
+                var cell = UIGenerator.GenerateCell(cellValue, col, row, ref DataGridLayout);
 
                 var tapGesture = new TapGestureRecognizer();
                 tapGesture.Tapped += (s, e) => OnCellTapped(cellAddress, cell);
@@ -240,42 +278,42 @@ public partial class SpreadsheetPage : ContentPage
 
     private void OnCellTapped(string cellAddress, Label cellControl)
     {
-        if (_activeCell != null && _cellControls.ContainsKey(_activeCell.Name))
+        if (!string.IsNullOrEmpty(_activeCellName) && _cellControls.ContainsKey(_activeCellName))
         {
-            _cellControls[_activeCell.Name].BackgroundColor = ColorConstants.cellBackgroundColor;
+            _cellControls[_activeCellName].BackgroundColor = ColorConstants.cellBackgroundColor;
         }
 
-        _activeCell = _spreadsheet.GetCell(cellAddress);
+        _activeCellName = cellAddress;
 
-        if (_activeCell is null)
+        var cellFormula = _spreadsheet.GetCellFormula(_activeCellName);
+
+        if (cellFormula is null)
         {
-            Trace.WriteLine($"Cell {_activeCell} is unexpectedly empty");
+            Trace.TraceError($"Cell {_activeCellName} is unexpectedly empty");
             return;
         }
 
         cellControl.BackgroundColor = ColorConstants.activeCellBackgroundColor;
 
         ActiveCellLabel.Text = cellAddress;
-        FormulaEntry.Text = _activeCell.Formula;
+        FormulaEntry.Text = cellFormula;
         FormulaEntry.Focus();
     }
 
     private void OnFormulaEntryCompleted(object sender, EventArgs e)
     {
-        ApplyCellValue();
+        ApplyCellFormula();
     }
 
-    private void ApplyCellValue()
+    private void ApplyCellFormula()
     {
-        if (_activeCell == null) return;
+        if (string.IsNullOrEmpty(_activeCellName)) return;
 
-        string inputValue = FormulaEntry.Text?.Trim() ?? "";
+        string formula = FormulaEntry.Text?.Trim() ?? "";
 
-        string? errorMessage = "";
+        string? errorMessage = _spreadsheetService.UpdateCellFormula(_activeCellName, formula);
 
-        _spreadsheet.SetCellValue(_activeCell.Name, inputValue, ref errorMessage);
-
-        if (errorMessage is not null && errorMessage.Length > 0)
+        if (!string.IsNullOrEmpty(errorMessage))
         {
             ShowError(
                 DataProcessor.FormatResource(
@@ -285,21 +323,27 @@ public partial class SpreadsheetPage : ContentPage
             );
         }
 
-        // Update ALL cells in case of dependencies
         UpdateAllCellDisplays();
+    }
+
+    private void RecalculateAllCells()
+    {
+        foreach (var cellName in _cellNameService.CellNames(_currentColumns, _currentRows))
+        {
+            var formula = _spreadsheet.GetCellFormula(cellName);
+
+            _spreadsheetService.UpdateCellFormula(cellName, formula);
+        }
     }
 
     private void UpdateAllCellDisplays()
     {
-        foreach (var cell in _spreadsheet.GetAllCells())
+        foreach (var cellName in _cellNameService.CellNames(_currentColumns, _currentRows))
         {
-            if (_cellControls.ContainsKey(cell.Name))
-            {
-                var cellControl = _cellControls[cell.Name];
+            var cellControl = _cellControls[cellName];
 
-                UpdateCellText(ref cellControl, cell);
-                UpdateCellColor(ref cellControl, cell);
-            }
+            UpdateCellText(ref cellControl, cellName);
+            UpdateCellColor(ref cellControl, cellName);
         }
     }
 
@@ -338,31 +382,39 @@ public partial class SpreadsheetPage : ContentPage
         UpdateAllCellDisplays();
     }
 
-    private void UpdateCellText(ref Label cellObject, ExcelCell cellData)
+    private void UpdateCellText(ref Label cellLabel, string cellName)
     {
         if (DisplayModeSwitch.IsToggled)
         {
-            cellObject.Text = cellData.Formula;
+            cellLabel.Text = _spreadsheet.GetCellFormula(cellName);
         }
         else
         {
-            cellObject.Text = cellData.Value.ToString();
+            cellLabel.Text = _spreadsheet.GetCellDisplayValue(cellName);
         }
     }
 
-    private void UpdateCellColor(ref Label cellObject, ExcelCell cellData)
+    private void UpdateCellColor(ref Label cellLabel, string cellName)
     {
-        if (!string.IsNullOrEmpty(cellData.Formula))
+        var cellFormula = _spreadsheet.GetCellFormula(cellName);
+        var cellValue = _spreadsheet.GetCellValue(cellName);
+
+        if (cellFormula is null || cellValue is null)
         {
-            cellObject.TextColor = ColorConstants.formulaColor;
+            return;
         }
-        else if (!string.IsNullOrEmpty(cellData.Value))
+
+        if (!string.IsNullOrEmpty(cellFormula))
         {
-            cellObject.TextColor = ColorConstants.valueColor;
+            cellLabel.TextColor = ColorConstants.formulaColor;
+        }
+        else if (!string.IsNullOrEmpty(cellValue.Value))
+        {
+            cellLabel.TextColor = ColorConstants.valueColor;
         }
         else
         {
-            cellObject.TextColor = ColorConstants.emptyColor;
+            cellLabel.TextColor = ColorConstants.emptyColor;
         }
     }
 

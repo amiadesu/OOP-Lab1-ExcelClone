@@ -1,22 +1,24 @@
 using ExcelClone.Values;
 
-namespace ExcelClone.Components
-{
-    public class ExcelCell
+namespace ExcelClone.Components;
+
+public class SpreadsheetCell {
+    public CellValue Value { get; private set; } = new CellValue(CellValueType.Text);
+    public string Formula { get; private set; } = "";
+
+    public void SetValue(CellValue value)
     {
-        public string Name { get; set; }
-        public CellValue Value { get; set; } = new CellValue(CellValueType.Text);
-        public string Formula { get; set; } = "";
+        Value = value;
+    }
 
-        public ExcelCell(string name)
-        {
-            Name = name;
-        }
+    public void SetFormula(string formula)
+    {
+        Formula = formula;
+    }
 
-        public void Clear()
-        {
-            Value.Clear();
-            Formula = "";
-        }
+    public void Clear()
+    {
+        Value.Clear();
+        Formula = "";
     }
 }

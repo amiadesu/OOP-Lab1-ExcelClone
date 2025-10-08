@@ -10,7 +10,7 @@ using ExcelClone.Resources.Localization;
 
 namespace ExcelClone.Evaluators.Tokens;
 
-public class FormulaTokenizer
+public class FormulaTokenizer : IFormulaTokenizer
 {
     private enum TokenParserState
     {
@@ -45,7 +45,7 @@ public class FormulaTokenizer
         {
             char c = expression[position];
 
-            Trace.WriteLine($"{position}, {c}");
+            Trace.TraceInformation($"{position}, {c}");
 
             switch (state)
             {
@@ -86,7 +86,7 @@ public class FormulaTokenizer
         }
 
         foreach (var token in tokens) {
-            Trace.WriteLine($"{token.Type}, {token.Value}");
+            Trace.TraceInformation($"{token.Type}, {token.Value}");
         }
 
         return tokens;

@@ -3,99 +3,106 @@ using System.Linq;
 using ExcelClone.Services;
 using ExcelClone.Constants;
 using ExcelClone.Values;
+using ExcelClone.Evaluators.Tokens;
+using ExcelClone.Utils;
+using Microsoft.Maui.Controls;
 
-namespace ExcelClone.Components
+namespace ExcelClone.Components;
+
+public class Spreadsheet : ICellStorage
 {
-    public class Spreadsheet
+    private readonly Dictionary<string, (SpreadsheetCell cell, string name)> _cells;
+    private readonly ICellNameService _cellNameService;
+    public int Columns { get; private set; } = 0;
+    public int Rows { get; private set; } = 0;
+
+    public Spreadsheet(ICellNameService cellNameService)
     {
-        private readonly Dictionary<string, ExcelCell> _cells;
-        private readonly IFormulaParserService _formulaParser;
-        public readonly ICellNameService cellNameService;
-        public int Columns { get; private set; }
-        public int Rows { get; private set; }
+        this._cellNameService = cellNameService;
+        _cells = new Dictionary<string, (SpreadsheetCell cell, string name)>();
+    }
 
-        public Spreadsheet(int columns, int rows, IFormulaParserService formulaParser, ICellNameService cellNameService)
-        {
-            this.cellNameService = cellNameService;
-            Columns = columns;
-            Rows = rows;
-            _formulaParser = formulaParser;
-            _cells = new Dictionary<string, ExcelCell>();
-            InitializeCells();
-        }
+    public void CreateNewCellStorage(int columns, int rows)
+    {
+        Columns = columns;
+        Rows = rows;
+        Clear();
+        InitializeCells();
+    }
 
-        private void InitializeCells()
+    public int GetColumns()
+    {
+        return Columns;
+    }
+    public int GetRows()
+    {
+        return Rows;
+    }
+
+    public string GetCellName(int col, int row) {
+        return _cellNameService.GetCellName(col, row);
+    }
+
+    private void InitializeCells()
+    {
+        for (int row = 0; row < Rows; row++)
         {
-            for (int row = 0; row < Rows; row++)
+            for (int col = 0; col < Columns; col++)
             {
-                for (int col = 0; col < Columns; col++)
-                {
-                    string cellName = cellNameService.GetCellName(col, row);
-                    _cells[cellName] = new ExcelCell(cellName);
-                }
+                string cellName = _cellNameService.GetCellName(col, row);
+                _cells[cellName] = (new SpreadsheetCell(), cellName);
             }
         }
+    }
 
-        public ExcelCell? GetCell(string cellName)
-        {
-            return _cells.ContainsKey(cellName.ToUpper()) ? _cells[cellName.ToUpper()] : null;
-        }
+    private void Clear()
+    {
+        _cells.Clear();
+    }
 
-        public void SetCellValue(string cellName, string value, ref string? errorMessage)
-        {
-            if (!_cells.ContainsKey(cellName.ToUpper()))
-                return;
+    public (SpreadsheetCell cell, string name)? GetCell(string cellName)
+    {
+        return CellExists(cellName) ? _cells[cellName.ToUpper()] : null;
+    }
 
-            var cell = _cells[cellName.ToUpper()];
-            
-            if (value.StartsWith(Literals.prefix))
-            {
-                cell.Formula = value;
-                cell.Value = _formulaParser.Evaluate(value, cellName, this, ref errorMessage);
-            }
-            else
-            {
-                cell.Formula = value;
-                cell.Value.Value = value;
-            }
+    public void SetCellFormula(string cellReference, string formula) {
+        if (!CellExists(cellReference))
+            return;
 
-            // Recalculate cells
-            RecalculateCells();
-        }
+        var cellObject = _cells[cellReference.ToUpper()];
+        
+        cellObject.cell.SetFormula(formula);
+    }
+    public void SetCellValue(string cellReference, CellValue value)
+    {
+        if (!CellExists(cellReference))
+            return;
 
-        public string GetCellDisplayValue(string cellName)
-        {
-            var cell = GetCell(cellName);
-            return cell?.Value.ToString() ?? Literals.refErrorMessage;
-        }
+        var cellObject = _cells[cellReference.ToUpper()];
+        
+        cellObject.cell.SetValue(value);
+    }
 
-        public CellValue? GetCellRealValue(string cellName)
-        {
-            var cell = GetCell(cellName);
-            return cell?.Value ?? null;
-        }
+    public string GetCellDisplayValue(string cellReference)
+    {
+        var cellObject = GetCell(cellReference);
+        return cellObject?.cell.Value.ToString() ?? Literals.refErrorMessage;
+    }
 
-        private void RecalculateCells()
-        {
-            // Recalculate all formula cells
-            foreach (var cell in _cells.Values)
-            {
-                if (!string.IsNullOrEmpty(cell.Formula))
-                {
-                    string? message = "";
-                    cell.Value = _formulaParser.Evaluate(cell.Formula, cell.Name, this, ref message);
-                }
-            }
-        }
+    public CellValue? GetCellValue(string cellReference)
+    {
+        var cellObject = GetCell(cellReference);
+        return cellObject?.cell.Value ?? null;
+    }
 
-        public List<ExcelCell> GetAllCells()
-        {
-            return _cells.Values.ToList();
-        }
+    public string GetCellFormula(string cellReference)
+    {
+        var cellObject = GetCell(cellReference);
+        return cellObject?.cell.Formula ?? "";
+    }
 
-        public bool CellExists(string cellName)
-        {
-            return _cells.ContainsKey(cellName.ToUpper());
-        }
+    private bool CellExists(string cellName)
+    {
+        return _cells.ContainsKey(cellName.ToUpper());
     }
 }

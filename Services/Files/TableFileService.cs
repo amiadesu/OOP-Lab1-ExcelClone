@@ -10,27 +10,30 @@ using ExcelClone.Components;
 using ExcelClone.Resources.Localization;
 using ExcelClone.Services;
 using ExcelClone.Utils;
+using ExcelClone.Evaluators.Tokens;
 
 namespace ExcelClone.FileSystem;
 
 public static class TableFileService
 {
-    public static async Task<string> Save(Spreadsheet spreadsheet, string fileName = "result.table")
+    public static async Task<string> Save(ICellStorageReader spreadsheet, string fileName = "result.table")
     {
         StringBuilder result = new StringBuilder();
 
-        // Write header
-        result.AppendLine($"{spreadsheet.Columns} {spreadsheet.Rows}");
+        int columns = spreadsheet.GetColumns();
+        int rows = spreadsheet.GetRows();
 
-        int totalCells = spreadsheet.Columns * spreadsheet.Rows;
+        // Write header
+        result.AppendLine($"{columns} {rows}");
+
+        int totalCells = columns * rows;
         for (int i = 0; i < totalCells; i++)
         {
-            int col = i / spreadsheet.Rows;
-            int row = i % spreadsheet.Rows;
+            int col = i / rows;
+            int row = i % rows;
 
-            string cellName = spreadsheet.cellNameService.GetCellName(col, row);
-            var cell = spreadsheet.GetCell(cellName);
-            string formula = cell?.Formula ?? string.Empty;
+            string cellName = spreadsheet.GetCellName(col, row);
+            var formula = spreadsheet.GetCellFormula(cellName);
             result.AppendLine(formula);
         }
 
@@ -48,7 +51,7 @@ public static class TableFileService
         );
     }
 
-    public static Spreadsheet Load(string path, IFormulaParserService parser, ICellNameService nameService)
+    public static Spreadsheet Load(string path, ICellNameService nameService)
     {
         using var reader = new StreamReader(path);
 
@@ -71,7 +74,8 @@ public static class TableFileService
             ));
         }
 
-        var spreadsheet = new Spreadsheet(columns, rows, parser, nameService);
+        var spreadsheet = new Spreadsheet(nameService);
+        spreadsheet.CreateNewCellStorage(columns, rows);
 
         // Read cell formulas
         int i = 0;
@@ -84,8 +88,7 @@ public static class TableFileService
 
             if (!string.IsNullOrEmpty(line))
             {
-                string? errorMessage = "";
-                spreadsheet.SetCellValue(cellName, line, ref errorMessage);
+                spreadsheet.SetCellFormula(cellName, line);
             }
 
             i++;

@@ -8,92 +8,69 @@ using ExcelClone.Evaluators.Tokens;
 using ExcelClone.Utils;
 using ExcelClone.Constants;
 using ExcelClone.Values;
+using System.Linq;
 
 namespace ExcelClone.Services;
 
 public class FormulaParserService : IFormulaParserService
 {
-    private Spreadsheet _currentSpreadsheet;
-    private string _currentCell;
+    private readonly IFormulaTokenizer _formulaTokenizer;
+    private readonly IFormulaEvaluator _formulaEvaluator;
 
-    private readonly FormulaTokenizer _formulaTokenizer = new FormulaTokenizer();
-
-    public CellValue Evaluate(string formula, string currentCell, Spreadsheet spreadsheet, ref string? errorMessage)
+    public FormulaParserService(IFormulaTokenizer tokenizer, IFormulaEvaluator evaluator)
     {
+        _formulaTokenizer = tokenizer;
+        _formulaEvaluator = evaluator;
+    }
+
+    public (CellValue result, List<string> dependencies, string? errorMessage) Evaluate(string formula)
+    {
+        List<string> dependencies = new();
         if (formula.StartsWith(Literals.prefix))
         {
             try
             {
-                _currentSpreadsheet = spreadsheet;
-                _currentCell = currentCell;
-
                 var expression = formula[Literals.prefixLength..];
                 var tokens = _formulaTokenizer.Tokenize(expression);
-                return EvaluateExpression(tokens, ref errorMessage);
+
+                dependencies = GetCellDependencies(tokens);
+
+                var result = EvaluateExpression(tokens);
+                return (result.result, dependencies, result.errorMessage);
             }
             catch (Exception e)
             {
-                Trace.WriteLine($"Formula evaluation error: {e.Message}");
-                return Literals.errorMessage;
+                Trace.TraceError($"Formula evaluation error: {e.Message}");
+                return (new CellValue(Literals.errorMessage), dependencies, e.Message);
             }
         }
 
-        return formula;
+        return (new CellValue(formula), dependencies, null);
     }
 
-    private string EvaluateExpression(List<Token> tokens, ref string? errorMessage)
+    private static List<string> GetCellDependencies(List<Token> tokens)
     {
-        int idx = 0;
-        while (idx < tokens.Count)
+        List<string> dependencies = new();
+
+        foreach (var token in tokens.Where(t => t.Type == TokenType.CellReference))
         {
-            Token token = tokens[idx];
-
-            switch (token.Type)
-            {
-                case TokenType.CellReference:
-                    CellValue? realCellValue = _currentSpreadsheet.GetCellRealValue(token.Value);
-                    if (realCellValue is null)
-                    {
-                        return Literals.refErrorMessage;
-                    }
-                    if (StringChecker.IsSignedNumber(realCellValue.Value))
-                    {
-                        tokens[idx] = new Token
-                        {
-                            Type = TokenType.CellValue,
-                            CellValue = realCellValue,
-                            Position = token.Position
-                        };
-                    }
-                    else if (StringChecker.IsError(realCellValue.Value))
-                    {
-                        return Literals.errorMessage;
-                    }
-                    else
-                    {
-                        tokens[idx] = new Token
-                        {
-                            Type = TokenType.CellValue,
-                            CellValue = realCellValue,
-                            Position = token.Position
-                        };
-                    }
-                    break;
-            }
-
-            idx++;
+            dependencies.Add(token.Value);
         }
 
+        return dependencies;
+    }
+
+    private (CellValue result, string? errorMessage) EvaluateExpression(List<Token> tokens)
+    {
         try
         {
-            CellValue result = FormulaEvaluator.Evaluate(tokens);
-            return result;
+            CellValue result = _formulaEvaluator.Evaluate(tokens);
+            return (result, null);
         }
         catch (Exception e)
         {
-            Trace.WriteLine(e);
-            errorMessage = e.Message;
-            return Literals.errorMessage;
+            Trace.TraceError(e.Message);
+            return (new CellValue(Literals.errorMessage), e.Message);
         }
     }
 }

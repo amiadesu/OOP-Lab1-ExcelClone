@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using ExcelClone.Resources.Localization;
 using ExcelClone.Utils;
 
@@ -18,7 +19,7 @@ public class CellNameService : ICellNameService
 
     public (int columnIndex, int rowIndex) ParseCellName(string cellName)
     {
-        ValidateCellName(cellName);
+        ValidateCellNameNotEmpty(cellName);
 
         var columnPart = string.Concat(cellName.TakeWhile(char.IsLetter));
         ValidateColumnName(columnPart);
@@ -52,16 +53,16 @@ public class CellNameService : ICellNameService
     {
         ValidateColumnIndex(columnIndex);
 
-        string columnName = "";
+        StringBuilder columnName = new StringBuilder();
         int index = columnIndex;
 
         while (index >= 0)
         {
-            columnName = (char)('A' + (index % 26)) + columnName;
+            columnName.Insert(0, (char)('A' + (index % 26)));
             index = (index / 26) - 1;
         }
 
-        return columnName;
+        return columnName.ToString();
     }
 
     public int GetColumnIndex(string columnName)
@@ -113,8 +114,8 @@ public class CellNameService : ICellNameService
 
     public string GetCellRange(string startCell, string endCell)
     {
-        var (startCol, startRow) = ParseCellName(startCell);
-        var (endCol, endRow) = ParseCellName(endCell);
+        ValidateCellName(startCell);
+        ValidateCellName(endCell);
 
         return $"{startCell}:{endCell}";
     }
@@ -161,7 +162,29 @@ public class CellNameService : ICellNameService
         return cells.ToArray();
     }
 
-    private void ValidateCellName(string cellName)
+    public IEnumerable<string> CellNames(int cols, int rows)
+    {
+        for (int i = 0; i < cols; i++)
+        {
+            for (int j = 0; j < rows; j++)
+            {
+                yield return GetCellName(i, j);
+            }
+        }
+    }
+
+    private static void ValidateCellName(string cellName)
+    {
+        ValidateCellNameNotEmpty(cellName);
+
+        var columnPart = string.Concat(cellName.TakeWhile(char.IsLetter));
+        ValidateColumnName(columnPart);
+
+        var rowPart = string.Concat(cellName.SkipWhile(char.IsLetter));
+        ValidateRowName(rowPart);
+    }
+
+    private static void ValidateCellNameNotEmpty(string cellName)
     {
         if (string.IsNullOrEmpty(cellName))
         {
@@ -173,7 +196,7 @@ public class CellNameService : ICellNameService
         }
     }
 
-    private void ValidateColumnName(string columnName)
+    private static void ValidateColumnName(string columnName)
     {
         if (string.IsNullOrEmpty(columnName))
         {
@@ -185,7 +208,7 @@ public class CellNameService : ICellNameService
         }
     }
 
-    private void ValidateColumnIndex(int columnIndex)
+    private static void ValidateColumnIndex(int columnIndex)
     {
         if (columnIndex < 0)
         {
@@ -197,7 +220,7 @@ public class CellNameService : ICellNameService
         }
     }
 
-    public void ValidateRowName(string rowName)
+    private static void ValidateRowName(string rowName)
     {
         if (string.IsNullOrEmpty(rowName))
         {
@@ -209,7 +232,7 @@ public class CellNameService : ICellNameService
         }
     }
 
-    private void ValidateRowIndex(int rowIndex)
+    private static void ValidateRowIndex(int rowIndex)
     {
         if (rowIndex < 0)
         {

@@ -9,7 +9,7 @@ public static class CellFunctions
 {
     public static CellValue PowerOperator(CellValue left, CellValue right)
     {
-        return Math.Pow(left.NumberValue, right.NumberValue);
+        return new CellValue(Math.Pow(left.NumberValue, right.NumberValue));
     }
 
     public static CellValue MultiplicationOperator(CellValue left, CellValue right)
@@ -57,37 +57,37 @@ public static class CellFunctions
                 AppResources.CannotDivideBy0
             ));
         }
-        return (int)(left / right);
+        return new CellValue((int)(left / right));
     }
 
     public static CellValue LessThanOperator(CellValue left, CellValue right)
     {
-        return left < right;
+        return new CellValue(left < right);
     }
 
     public static CellValue LessOrEqualOperator(CellValue left, CellValue right)
     {
-        return left <= right;
+        return new CellValue(left <= right);
     }
 
     public static CellValue GreaterThanOperator(CellValue left, CellValue right)
     {
-        return left > right;
+        return new CellValue(left > right);
     }
 
     public static CellValue GreaterOrEqualOperator(CellValue left, CellValue right)
     {
-        return left >= right;
+        return new CellValue(left >= right);
     }
 
     public static CellValue EqualOperator(CellValue left, CellValue right)
     {
-        return left == right;
+        return new CellValue(left == right);
     }
 
     public static CellValue NotEqualOperator(CellValue left, CellValue right)
     {
-        return left != right;
+        return new CellValue(left != right);
     }
 
     public static CellValue AndOperator(CellValue left, CellValue right)
@@ -107,7 +107,7 @@ public static class CellFunctions
     /// </summary>
     public static CellValue LogicalEquivalentOperator(CellValue left, CellValue right)
     {
-        return left.Equivalent(right);
+        return new CellValue(left.Equivalent(right));
     }
 
 
@@ -163,7 +163,7 @@ public static class CellFunctions
                 ("Count", 1)
             ));
         }
-        return args[0] + 1;
+        return new CellValue(args[0] + 1);
     }
 
     public static CellValue DecrementFunction(CellValue[] args)
@@ -176,7 +176,7 @@ public static class CellFunctions
                 ("Count", 1)
             ));
         }
-        return args[0] - 1;
+        return new CellValue(args[0] - 1);
     }
 
     public static CellValue NotFunction(CellValue[] args)
@@ -189,6 +189,6 @@ public static class CellFunctions
                 ("Count", 1)
             ));
         }
-        return args[0] == 0;
+        return new CellValue(args[0] == 0);
     }
 }

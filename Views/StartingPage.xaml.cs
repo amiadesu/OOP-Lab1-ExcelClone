@@ -12,20 +12,31 @@ namespace ExcelClone.Views;
 
 public partial class StartingPage : ContentPage
 {
+    private bool _initialized = false;
 
     public StartingPage()
     {
         InitializeComponent();
-
-        GenerateRecentFileObjects();
     }
 
-    private async void OnOpenSpreadsheetClicked(object sender, EventArgs e)
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+
+        if (_initialized)
+            return;
+
+        _initialized = true;
+
+        await GenerateRecentFileObjects();
+    }
+
+    private static async void OnOpenSpreadsheetClicked(object sender, EventArgs e)
     {
         await Shell.Current.Navigation.PushAsync(new SpreadsheetPage());
     }
 
-    private async void OnHelpPageClicked(object sender, EventArgs e)
+    private static async void OnHelpPageClicked(object sender, EventArgs e)
     {
         await Shell.Current.Navigation.PushAsync(new HelpPage());
     }

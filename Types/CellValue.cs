@@ -14,7 +14,7 @@ public enum CellValueType
     GeneralError
 }
 
-public class CellValue : IComparable<CellValue>
+public sealed class CellValue : IComparable<CellValue>
 {
     public CellValueType Type { get; set; }
 
@@ -45,19 +45,23 @@ public class CellValue : IComparable<CellValue>
         }
     }
 
-    public static implicit operator CellValue(double value)
+    public CellValue(double value)
     {
-        return new CellValue(CellValueType.Number, numberValue: value);
+        Type = CellValueType.Number;
+        NumberValue = value;
+        _value = this.ToString();
     }
 
-    public static implicit operator CellValue(string value)
+    public CellValue(string value)
     {
-        return new CellValue(CellValueType.Text, value: value);
+        Value = value;
     }
 
-    public static implicit operator CellValue(bool value)
+    public CellValue(bool value)
     {
-        return new CellValue(CellValueType.Boolean, numberValue: value ? 1 : 0);
+        Type = CellValueType.Boolean;
+        NumberValue = value ? 1 : 0;
+        _value = this.ToString();
     }
 
     // Comparisons
@@ -111,6 +115,16 @@ public class CellValue : IComparable<CellValue>
             ("Operator", "+")
         ));
     }
+    public static CellValue operator +(CellValue a, double b)
+    {
+        if (a.Type == CellValueType.Number)
+            return new CellValue(CellValueType.Number, numberValue: a.NumberValue + b);
+
+        throw new InvalidOperationException(DataProcessor.FormatResource(
+            AppResources.OperatorDefinedOnlyForNumbers,
+            ("Operator", "+")
+        ));
+    }
     public static CellValue operator +(CellValue cell)
     {
         if (cell.Type == CellValueType.Number)
@@ -125,6 +139,16 @@ public class CellValue : IComparable<CellValue>
     {
         if (a.Type == CellValueType.Number && b.Type == CellValueType.Number)
             return new CellValue(CellValueType.Number, numberValue: a.NumberValue - b.NumberValue);
+
+        throw new InvalidOperationException(DataProcessor.FormatResource(
+            AppResources.OperatorDefinedOnlyForNumbers,
+            ("Operator", "-")
+        ));
+    }
+    public static CellValue operator -(CellValue a, double b)
+    {
+        if (a.Type == CellValueType.Number)
+            return new CellValue(CellValueType.Number, numberValue: a.NumberValue - b);
 
         throw new InvalidOperationException(DataProcessor.FormatResource(
             AppResources.OperatorDefinedOnlyForNumbers,
@@ -151,6 +175,16 @@ public class CellValue : IComparable<CellValue>
             ("Operator", "*")
         ));
     }
+    public static CellValue operator *(CellValue a, double b)
+    {
+        if (a.Type == CellValueType.Number)
+            return new CellValue(CellValueType.Number, numberValue: a.NumberValue * b);
+
+        throw new InvalidOperationException(DataProcessor.FormatResource(
+            AppResources.OperatorDefinedOnlyForNumbers,
+            ("Operator", "*")
+        ));
+    }
     public static CellValue operator /(CellValue a, CellValue b)
     {
         if (a.Type == CellValueType.Number && b.Type == CellValueType.Number)
@@ -165,10 +199,42 @@ public class CellValue : IComparable<CellValue>
             ("Operator", "/")
         ));
     }
+    public static CellValue operator /(CellValue a, double b)
+    {
+        if (a.Type == CellValueType.Number)
+        {
+            if (DoubleChecker.Equal(b, 0))
+                throw new DivideByZeroException();
+            return new CellValue(CellValueType.Number, numberValue: a.NumberValue / b);
+        }
+
+        throw new InvalidOperationException(DataProcessor.FormatResource(
+            AppResources.OperatorDefinedOnlyForNumbers,
+            ("Operator", "/")
+        ));
+    }
     public static CellValue operator %(CellValue a, CellValue b)
     {
         if (a.Type == CellValueType.Number && b.Type == CellValueType.Number)
+        {
+            if (DoubleChecker.Equal(b.NumberValue, 0))
+                throw new DivideByZeroException();
             return new CellValue(CellValueType.Number, numberValue: a.NumberValue % b.NumberValue);
+        }
+
+        throw new InvalidOperationException(DataProcessor.FormatResource(
+            AppResources.OperatorDefinedOnlyForNumbers,
+            ("Operator", "%")
+        ));
+    }
+    public static CellValue operator %(CellValue a, double b)
+    {
+        if (a.Type == CellValueType.Number)
+        {
+            if (DoubleChecker.Equal(b, 0))
+                throw new DivideByZeroException();
+            return new CellValue(CellValueType.Number, numberValue: a.NumberValue % b);
+        }
 
         throw new InvalidOperationException(DataProcessor.FormatResource(
             AppResources.OperatorDefinedOnlyForNumbers,

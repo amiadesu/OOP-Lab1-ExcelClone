@@ -2,6 +2,7 @@
 
 using ExcelClone.Components;
 using ExcelClone.Constants;
+using ExcelClone.Values;
 using Microsoft.Maui;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Controls.Shapes;
@@ -11,11 +12,11 @@ namespace ExcelClone.Utils;
 
 public static class UIGenerator
 {
-    public static Label GenerateCell(ExcelCell excelCell, int col, int row, ref AbsoluteLayout gridLayout)
+    public static Label GenerateCell(CellValue cellValue, int col, int row, ref AbsoluteLayout gridLayout)
     {
         var cell = new Label
         {
-            Text = excelCell.Value.ToString(),
+            Text = cellValue.Value.ToString(),
             WidthRequest = Literals.cellWidth,
             HeightRequest = Literals.cellHeight,
             FontSize = 10,
