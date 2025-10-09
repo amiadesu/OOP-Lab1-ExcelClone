@@ -25,7 +25,7 @@ public class NumberAutomatonTests
     {
         var result = _numberAutomaton.TestString(s);
 
-        Assert.Equal(result, expectedResult);
+        Assert.Equal(expectedResult, result);
     }
 
     [Theory]
@@ -39,7 +39,7 @@ public class NumberAutomatonTests
     {
         var result = _numberAutomaton.TestChar(c);
 
-        Assert.Equal(result, expectedResult);
+        Assert.Equal(expectedResult, result);
     }
 
     [Theory]
@@ -61,6 +61,6 @@ public class NumberAutomatonTests
 
         var result = _numberAutomaton.IsAccepting();
 
-        Assert.Equal(result, expectedResult);
+        Assert.Equal(expectedResult, result);
     }
 }

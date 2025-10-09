@@ -26,7 +26,7 @@ public class CellNameAutomatonTests
     {
         var result = _cellNameAutomaton.TestString(s);
 
-        Assert.Equal(result, expectedResult);
+        Assert.Equal(expectedResult, result);
     }
 
     [Theory]
@@ -39,7 +39,7 @@ public class CellNameAutomatonTests
     {
         var result = _cellNameAutomaton.TestChar(c);
 
-        Assert.Equal(result, expectedResult);
+        Assert.Equal(expectedResult, result);
     }
 
     [Theory]
@@ -62,6 +62,6 @@ public class CellNameAutomatonTests
 
         var result = _cellNameAutomaton.IsAccepting();
 
-        Assert.Equal(result, expectedResult);
+        Assert.Equal(expectedResult, result);
     }
 }

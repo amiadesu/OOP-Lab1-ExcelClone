@@ -26,7 +26,7 @@ public class FunctionNameAutomatonTests
     {
         var result = _functionNameAutomaton.TestString(s);
 
-        Assert.Equal(result, expectedResult);
+        Assert.Equal(expectedResult, result);
     }
 
     [Theory]
@@ -39,7 +39,7 @@ public class FunctionNameAutomatonTests
     {
         var result = _functionNameAutomaton.TestChar(c);
 
-        Assert.Equal(result, expectedResult);
+        Assert.Equal(expectedResult, result);
     }
 
     [Theory]
@@ -62,6 +62,6 @@ public class FunctionNameAutomatonTests
 
         var result = _functionNameAutomaton.IsAccepting();
 
-        Assert.Equal(result, expectedResult);
+        Assert.Equal(expectedResult, result);
     }
 }
