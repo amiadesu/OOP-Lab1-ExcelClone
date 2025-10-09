@@ -18,6 +18,11 @@ public class NumberAutomaton : IAutomaton
         return this._state;
     }
 
+    public bool IsAccepting()
+    {
+        return this._state == AutomatonState.Accepting;
+    }
+
     public bool TestChar(char input)
     {
         return (input == '.') || Char.IsDigit(input);
