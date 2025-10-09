@@ -80,6 +80,8 @@ public partial class SpreadsheetPage : ContentPage
         RecalculateAllCells();
 
         GenerateExcelGrid(false);
+
+        UpdateAllCellDisplays();
     }
 
     private void OnGenerateClicked(object sender, EventArgs e)
