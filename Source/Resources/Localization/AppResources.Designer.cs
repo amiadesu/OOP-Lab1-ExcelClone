@@ -553,9 +553,17 @@ namespace ExcelClone.Resources.Localization {
             }
         }
         
-        internal static string CircularDependencyDetected {
-            get {
+        internal static string CircularDependencyDetected
+        {
+            get
+            {
                 return ResourceManager.GetString("CircularDependencyDetected", resourceCulture);
+            }
+        }
+        
+        internal static string InvalidErrorTypeProvided {
+            get {
+                return ResourceManager.GetString("InvalidErrorTypeProvided", resourceCulture);
             }
         }
 
