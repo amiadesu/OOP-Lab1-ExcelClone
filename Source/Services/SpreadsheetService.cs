@@ -1,7 +1,6 @@
+using System;
 using System.Collections.Generic;
 using ExcelClone.Components;
-using ExcelClone.Constants;
-using ExcelClone.Evaluators.Parsers;
 using ExcelClone.Resources.Localization;
 using ExcelClone.Utils;
 using ExcelClone.Values;
@@ -25,31 +24,39 @@ public class SpreadsheetService : ISpreadsheetService
     {
         _cellStorage.SetCellFormula(cellReference, formula);
 
-        return Evaluate(cellReference, formula);
+        return Evaluate(cellReference);
     }
 
-    private string? Evaluate(string cellReference, string formula)
+    private string? Evaluate(string cellReference)
     {
-        var result = _formulaParserService.Evaluate(formula);
+        var result = _cellStorage.UpdateCellValue(cellReference, _formulaParserService);
 
-        ProcessResult(cellReference, result);
-
-        var error = RecalculateDependants(cellReference);
-        if (!string.IsNullOrEmpty(error))
+        if (result is null)
         {
-            return error;
+            return null;
         }
 
-        return result.errorMessage;
+        try
+        {
+            ProcessResult(cellReference, result.Value);
+
+            var error = RecalculateDependants(cellReference);
+            if (!string.IsNullOrEmpty(error))
+            {
+                return error;
+            }
+        }
+        catch (Exception e)
+        {
+            return e.Message;
+        }
+        
+        return result?.errorMessage;
     }
 
     private void ProcessResult(string cellReference, (CellValue result, List<string> dependencies, string? errorMessage) result)
     {
         UpdateDependencies(cellReference, result.dependencies);
-
-        _cellStorage.SetCellValue(cellReference, result.result);
-
-        // Update all dependants
     }
 
     private void UpdateDependencies(string cellReference, List<string> dependencies)
@@ -75,7 +82,7 @@ public class SpreadsheetService : ISpreadsheetService
 
             if (visited.Contains(current))
             {
-                _cellStorage.SetCellValue(current, new CellValue(Literals.refErrorMessage));
+                _cellStorage.SetCellErrorValue(current, CellValueType.RefError);
                 
                 return DataProcessor.FormatResource(
                     AppResources.CircularDependencyDetected,

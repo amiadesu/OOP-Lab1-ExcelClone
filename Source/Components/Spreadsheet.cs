@@ -65,22 +65,32 @@ public class Spreadsheet : ICellStorage
         return CellExists(cellName) ? _cells[cellName.ToUpper()] : null;
     }
 
-    public void SetCellFormula(string cellReference, string formula) {
-        if (!CellExists(cellReference))
-            return;
-
-        var cellObject = _cells[cellReference.ToUpper()];
-        
-        cellObject.cell.SetFormula(formula);
-    }
-    public void SetCellValue(string cellReference, CellValue value)
+    public void SetCellFormula(string cellReference, string formula)
     {
         if (!CellExists(cellReference))
             return;
 
         var cellObject = _cells[cellReference.ToUpper()];
+
+        cellObject.cell.SetFormula(formula);
+    }
+    public void SetCellErrorValue(string cellReference, CellValueType errorType = CellValueType.GeneralError)
+    {
+        if (!CellExists(cellReference))
+            return;
+
+        var cellObject = _cells[cellReference.ToUpper()];
+
+        cellObject.cell.SetErrorValue(errorType);
+    }
+    public (CellValue result, List<string> dependencies, string? errorMessage)? UpdateCellValue(string cellReference, IFormulaParserService formulaParserService)
+    {
+        if (!CellExists(cellReference))
+            return null;
+
+        var cellObject = _cells[cellReference.ToUpper()];
         
-        cellObject.cell.SetValue(value);
+        return cellObject.cell.UpdateValue(formulaParserService);
     }
 
     public string GetCellDisplayValue(string cellReference)
