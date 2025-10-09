@@ -9,6 +9,7 @@ using ExcelClone.Utils;
 using ExcelClone.Constants;
 using ExcelClone.Values;
 using System.Linq;
+using ExcelClone.Types;
 
 namespace ExcelClone.Services;
 
@@ -23,7 +24,7 @@ public class FormulaParserService : IFormulaParserService
         _formulaEvaluator = evaluator;
     }
 
-    public (CellValue result, List<string> dependencies, string? errorMessage) Evaluate(string formula)
+    public ValueEvaluationResult Evaluate(string formula)
     {
         List<string> dependencies = new();
         if (formula.StartsWith(Literals.prefix))
@@ -36,16 +37,16 @@ public class FormulaParserService : IFormulaParserService
                 dependencies = GetCellDependencies(tokens);
 
                 var result = EvaluateExpression(tokens);
-                return (result.result, dependencies, result.errorMessage);
+                return new ValueEvaluationResult(result.result, dependencies, result.errorMessage);
             }
             catch (Exception e)
             {
                 Trace.TraceError($"Formula evaluation error: {e.Message}");
-                return (new CellValue(Literals.errorMessage), dependencies, e.Message);
+                return new ValueEvaluationResult(new CellValue(Literals.errorMessage), dependencies, e.Message);
             }
         }
 
-        return (new CellValue(formula), dependencies, null);
+        return new ValueEvaluationResult(new CellValue(formula), dependencies, null);
     }
 
     private static List<string> GetCellDependencies(List<Token> tokens)

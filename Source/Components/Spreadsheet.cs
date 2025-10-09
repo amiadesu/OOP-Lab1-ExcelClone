@@ -6,6 +6,7 @@ using ExcelClone.Values;
 using ExcelClone.Evaluators.Tokens;
 using ExcelClone.Utils;
 using Microsoft.Maui.Controls;
+using ExcelClone.Types;
 
 namespace ExcelClone.Components;
 
@@ -83,7 +84,7 @@ public class Spreadsheet : ICellStorage
 
         cellObject.cell.SetErrorValue(errorType);
     }
-    public (CellValue result, List<string> dependencies, string? errorMessage)? UpdateCellValue(string cellReference, IFormulaParserService formulaParserService)
+    public ValueEvaluationResult? UpdateCellValue(string cellReference, IFormulaParserService formulaParserService)
     {
         if (!CellExists(cellReference))
             return null;

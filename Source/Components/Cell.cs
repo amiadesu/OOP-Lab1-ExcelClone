@@ -1,7 +1,7 @@
 using System;
-using System.Collections.Generic;
 using ExcelClone.Resources.Localization;
 using ExcelClone.Services;
+using ExcelClone.Types;
 using ExcelClone.Utils;
 using ExcelClone.Values;
 
@@ -16,10 +16,10 @@ public class SpreadsheetCell {
         Formula = formula;
     }
 
-    public (CellValue result, List<string> dependencies, string? errorMessage) UpdateValue(IFormulaParserService formulaParserService)
+    public ValueEvaluationResult UpdateValue(IFormulaParserService formulaParserService)
     {
         var result = formulaParserService.Evaluate(Formula);
-        Value = result.result;
+        Value = result.Result;
 
         return result;
     }

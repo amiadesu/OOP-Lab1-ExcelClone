@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using ExcelClone.Components;
 using ExcelClone.Resources.Localization;
+using ExcelClone.Types;
 using ExcelClone.Utils;
 using ExcelClone.Values;
 
@@ -38,7 +39,7 @@ public class SpreadsheetService : ISpreadsheetService
 
         try
         {
-            ProcessResult(cellReference, result.Value);
+            ProcessResult(cellReference, result);
 
             var error = RecalculateDependants(cellReference);
             if (!string.IsNullOrEmpty(error))
@@ -51,12 +52,12 @@ public class SpreadsheetService : ISpreadsheetService
             return e.Message;
         }
         
-        return result?.errorMessage;
+        return result?.ErrorMessage;
     }
 
-    private void ProcessResult(string cellReference, (CellValue result, List<string> dependencies, string? errorMessage) result)
+    private void ProcessResult(string cellReference, ValueEvaluationResult result)
     {
-        UpdateDependencies(cellReference, result.dependencies);
+        UpdateDependencies(cellReference, result.Dependencies);
     }
 
     private void UpdateDependencies(string cellReference, List<string> dependencies)
