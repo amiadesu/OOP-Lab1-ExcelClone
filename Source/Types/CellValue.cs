@@ -313,6 +313,13 @@ public sealed class CellValue : IComparable<CellValue>
     }
 
     // Custom methods
+    public void CopyFrom(CellValue other)
+    {
+        Type = other.Type;
+        NumberValue = other.NumberValue;
+        Value = other.Value;
+    }
+
     public bool Equivalent(CellValue other)
     {
         return this.Value == other.Value || DoubleChecker.Equal(this.NumberValue, other.NumberValue);

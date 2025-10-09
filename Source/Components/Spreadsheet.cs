@@ -3,6 +3,7 @@ using ExcelClone.Services;
 using ExcelClone.Constants;
 using ExcelClone.Values;
 using ExcelClone.Types;
+using System;
 
 namespace ExcelClone.Components;
 
@@ -21,10 +22,16 @@ public class Spreadsheet : ICellStorage
 
     public void CreateNewCellStorage(int columns, int rows)
     {
+        var oldCells = new Dictionary<string, (SpreadsheetCell cell, string name)>(_cells);
+        int oldCols = Columns;
+        int oldRows = Rows;
+
         Columns = columns;
         Rows = rows;
         Clear();
         InitializeCells();
+
+        RestoreCellsFrom(oldCols, oldRows, oldCells);
     }
 
     public int GetColumns()
@@ -55,6 +62,25 @@ public class Spreadsheet : ICellStorage
     private void Clear()
     {
         _cells.Clear();
+    }
+
+    private void RestoreCellsFrom(int columns, int rows, Dictionary<string, (SpreadsheetCell cell, string name)> cellsSource)
+    {
+        for (int row = 0; row < Math.Min(Rows, rows); row++)
+        {
+            for (int col = 0; col < Math.Min(Columns, columns); col++)
+            {
+                string cellName = _cellNameService.GetCellName(col, row);
+                string upperName = cellName.ToUpper();
+
+                if (!cellsSource.TryGetValue(upperName, out var oldCell))
+                {
+                    continue;
+                }
+                
+                _cells[upperName].cell.CopyFrom(oldCell.cell);
+            }
+        }
     }
 
     public (SpreadsheetCell cell, string name)? GetCell(string cellName)

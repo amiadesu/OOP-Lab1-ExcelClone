@@ -38,6 +38,12 @@ public class SpreadsheetCell {
         Value = new CellValue(errorType);
     }
 
+    public void CopyFrom(SpreadsheetCell other)
+    {
+        Value.CopyFrom(other.Value);
+        Formula = other.Formula;
+    }
+
     public void Clear()
     {
         Value.Clear();
