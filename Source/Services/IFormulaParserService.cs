@@ -1,12 +1,8 @@
-using System.Collections.Generic;
-using ExcelClone.Components;
-using ExcelClone.Evaluators.Tokens;
-using ExcelClone.Values;
+using ExcelClone.Types;
 
-namespace ExcelClone.Services
+namespace ExcelClone.Services;
+
+public interface IFormulaParserService
 {
-    public interface IFormulaParserService
-    {
-        (CellValue result, List<string> dependencies, string? errorMessage) Evaluate(string formula);
-    }
+    ValueEvaluationResult Evaluate(string formula);
 }

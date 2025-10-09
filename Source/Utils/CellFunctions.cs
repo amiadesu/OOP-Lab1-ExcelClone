@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using ExcelClone.Resources.Localization;
 using ExcelClone.Values;
 

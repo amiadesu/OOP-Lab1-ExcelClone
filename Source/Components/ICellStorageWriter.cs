@@ -1,3 +1,5 @@
+using ExcelClone.Services;
+using ExcelClone.Types;
 using ExcelClone.Values;
 
 namespace ExcelClone.Components;
@@ -5,5 +7,6 @@ namespace ExcelClone.Components;
 public interface ICellStorageWriter
 {
     public void SetCellFormula(string cellReference, string formula);
-    public void SetCellValue(string cellReference, CellValue value);
+    public void SetCellErrorValue(string cellReference, CellValueType errorType = CellValueType.GeneralError);
+    public ValueEvaluationResult? UpdateCellValue(string cellReference, IFormulaParserService formulaParserService);
 }

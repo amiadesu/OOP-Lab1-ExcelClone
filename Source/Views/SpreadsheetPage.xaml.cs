@@ -1,4 +1,3 @@
-using Microsoft.Maui;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
 using System;
@@ -7,15 +6,11 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using ExcelClone.Components;
 using ExcelClone.Services;
-using System.IO;
 using ExcelClone.FileSystem;
 using ExcelClone.Utils;
 using ExcelClone.Resources.Localization;
 using ExcelClone.Constants;
-using Windows.ApplicationModel.VoiceCommands;
 using ExcelClone.Evaluators.Tokens;
-using System.Linq;
-using ExcelClone.Values;
 using ExcelClone.Evaluators;
 using ExcelClone.Evaluators.Parsers;
 
@@ -89,7 +84,7 @@ public partial class SpreadsheetPage : ContentPage
 
     private void OnGenerateClicked(object sender, EventArgs e)
     {
-        GenerateExcelGrid();
+        GenerateExcelGrid(true);
     }
 
     private async void OnHomeClicked(object sender, EventArgs e)
@@ -174,6 +169,8 @@ public partial class SpreadsheetPage : ContentPage
         }
 
         GenerateWithClock();
+
+        UpdateAllCellDisplays();
     }
 
     private void ClearEverything()
