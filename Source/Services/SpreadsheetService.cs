@@ -39,9 +39,7 @@ public class SpreadsheetService : ISpreadsheetService
 
         try
         {
-            ProcessResult(cellReference, result);
-
-            var error = RecalculateDependants(cellReference);
+            var error = ProcessResult(cellReference, result);
             if (!string.IsNullOrEmpty(error))
             {
                 return error;
@@ -55,9 +53,13 @@ public class SpreadsheetService : ISpreadsheetService
         return result?.ErrorMessage;
     }
 
-    private void ProcessResult(string cellReference, ValueEvaluationResult result)
+    private string? ProcessResult(string cellReference, ValueEvaluationResult result)
     {
         UpdateDependencies(cellReference, result.Dependencies);
+
+        var error = RecalculateDependants(cellReference);
+
+        return error;
     }
 
     private void UpdateDependencies(string cellReference, List<string> dependencies)
