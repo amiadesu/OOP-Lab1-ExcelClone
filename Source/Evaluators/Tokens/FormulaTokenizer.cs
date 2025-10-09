@@ -117,22 +117,22 @@ public class FormulaTokenizer : IFormulaTokenizer
         }
         else if (IsOperator(c))
         {
-            tokens.Add(new Token { Type = TokenType.Operator, Value = c.ToString(), Position = position });
+            tokens.Add(new Token { Type = TokenType.Operator, Value = c.ToString() });
             position++;
         }
         else if (c == '(' || c == ')')
         {
-            tokens.Add(new Token { Type = TokenType.Parenthesis, Value = c.ToString(), Position = position });
+            tokens.Add(new Token { Type = TokenType.Parenthesis, Value = c.ToString() });
             position++;
         }
         else if (c == ',')
         {
-            tokens.Add(new Token { Type = TokenType.Comma, Value = ",", Position = position });
+            tokens.Add(new Token { Type = TokenType.Comma, Value = "," });
             position++;
         }
         else if (c == ':')
         {
-            tokens.Add(new Token { Type = TokenType.Colon, Value = ":", Position = position });
+            tokens.Add(new Token { Type = TokenType.Colon, Value = ":" });
             position++;
         }
         else
@@ -152,8 +152,7 @@ public class FormulaTokenizer : IFormulaTokenizer
         Token token = new Token
         {
             Type = TokenType.Number,
-            Value = number,
-            Position = position
+            Value = number
         };
 
         _numberAutomaton.Reset();
@@ -167,8 +166,7 @@ public class FormulaTokenizer : IFormulaTokenizer
         Token token = new Token
         {
             Type = TokenType.Text,
-            Value = text,
-            Position = position
+            Value = text
         };
 
         position++; // Skip closing quote
@@ -186,11 +184,11 @@ public class FormulaTokenizer : IFormulaTokenizer
         if (!_cellNameAutomaton.TestString(reference) ||
             (position < expression.Length && expression[position] == '('))
         {
-            token = new Token { Type = TokenType.Function, Value = reference.ToUpper(), Position = position };
+            token = new Token { Type = TokenType.Function, Value = reference.ToUpper() };
         }
         else
         {
-            token = new Token { Type = TokenType.CellReference, Value = reference.ToUpper(), Position = position };
+            token = new Token { Type = TokenType.CellReference, Value = reference.ToUpper() };
         }
 
         _cellNameAutomaton.Reset();
@@ -202,7 +200,7 @@ public class FormulaTokenizer : IFormulaTokenizer
     {
         string function = ReadWhile(expression, ref position, c => _functionNameAutomaton.Insert(c) != AutomatonState.Rejecting);
 
-        Token token = new Token { Type = TokenType.Function, Value = function.ToUpper(), Position = position };
+        Token token = new Token { Type = TokenType.Function, Value = function.ToUpper() };
 
         _functionNameAutomaton.Reset();
 
