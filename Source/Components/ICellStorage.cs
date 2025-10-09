@@ -1,5 +1,3 @@
-using ExcelClone.Values;
-
 namespace ExcelClone.Components;
 
 public interface ICellStorage : ICellStorageReader, ICellStorageWriter

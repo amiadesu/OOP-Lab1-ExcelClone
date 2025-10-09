@@ -1,9 +1,6 @@
-using Microsoft.Maui;
 using Microsoft.Maui.Controls;
-using Microsoft.Maui.Graphics;
 using System;
 using ExcelClone.FileSystem;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using ExcelClone.Utils;
 using ExcelClone.Resources.Localization;
