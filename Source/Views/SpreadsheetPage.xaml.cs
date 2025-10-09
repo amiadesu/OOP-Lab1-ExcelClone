@@ -80,13 +80,11 @@ public partial class SpreadsheetPage : ContentPage
         RecalculateAllCells();
 
         GenerateExcelGrid(false);
-
-        UpdateAllCellDisplays();
     }
 
     private void OnGenerateClicked(object sender, EventArgs e)
     {
-        GenerateExcelGrid();
+        GenerateExcelGrid(true);
     }
 
     private async void OnHomeClicked(object sender, EventArgs e)
@@ -171,6 +169,8 @@ public partial class SpreadsheetPage : ContentPage
         }
 
         GenerateWithClock();
+
+        UpdateAllCellDisplays();
     }
 
     private void ClearEverything()
