@@ -50,7 +50,7 @@ public class FormulaTokenizerTests
 
         var tokens = _formulaTokenizer.Tokenize(test);
 
-        Assert.Equal(tokens.Count, expectedTokens.Count());
+        Assert.Equal(tokens.Count, expectedTokens.Length);
 
         for (int i = 0; i < tokens.Count; i++)
         {
