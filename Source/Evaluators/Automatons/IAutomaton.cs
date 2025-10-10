@@ -4,6 +4,7 @@ public interface IAutomaton
 {
     AutomatonState Insert(char input);
     AutomatonState GetCurrentState();
+    bool IsAccepting();
     /// <summary>
     /// Test if automaton will accept this character as a starting one.
     /// </summary>

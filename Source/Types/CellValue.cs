@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using ExcelClone.Constants;
 using ExcelClone.Resources.Localization;
 using ExcelClone.Utils;
@@ -327,6 +328,7 @@ public sealed class CellValue : IComparable<CellValue>
 
     public void ProcessValue()
     {
+        Trace.TraceInformation($"Before: {GetDescription()}");
         if (Value == Literals.falseLiteral)
         {
             NumberValue = 0;
@@ -355,6 +357,12 @@ public sealed class CellValue : IComparable<CellValue>
                 Type = CellValueType.Number;
             }
         }
+        Trace.TraceInformation($"After: {GetDescription()}");
+    }
+
+    public string GetDescription()
+    {
+        return $"Type: {Type}, Value: {Value}, Number value: {NumberValue}";
     }
 
     public void Clear()

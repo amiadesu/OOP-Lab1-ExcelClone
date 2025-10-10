@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using ExcelClone.Resources.Localization;
 using ExcelClone.Services;
 using ExcelClone.Types;
@@ -19,7 +20,10 @@ public class SpreadsheetCell {
     public ValueEvaluationResult UpdateValue(IFormulaParserService formulaParserService)
     {
         var result = formulaParserService.Evaluate(Formula);
+
+        Trace.TraceInformation($"Before assigment: {Value.GetDescription()}");
         Value = result.Result;
+        Trace.TraceInformation($"After assigment: {Value.GetDescription()}");
 
         return result;
     }

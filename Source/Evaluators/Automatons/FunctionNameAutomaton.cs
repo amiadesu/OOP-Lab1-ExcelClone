@@ -19,6 +19,11 @@ public class FunctionNameAutomaton : IAutomaton
         return this._state;
     }
 
+    public bool IsAccepting()
+    {
+        return this._state == AutomatonState.Accepting;
+    }
+
     public bool TestChar(char input)
     {
         return CharChecker.IsLatin(input);
