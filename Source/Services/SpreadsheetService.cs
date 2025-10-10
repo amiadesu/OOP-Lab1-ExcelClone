@@ -30,7 +30,7 @@ public class SpreadsheetService : ISpreadsheetService
 
     private string? Evaluate(string cellReference)
     {
-        var result = _cellStorage.UpdateCellValue(cellReference, _formulaParserService);
+        var result = UpdateCellValue(cellReference);
 
         if (result is null)
         {
@@ -49,8 +49,15 @@ public class SpreadsheetService : ISpreadsheetService
         {
             return e.Message;
         }
-        
+
         return result?.ErrorMessage;
+    }
+    
+    private ValueEvaluationResult? UpdateCellValue(string cellReference)
+    {
+        var result = _cellStorage.UpdateCellValue(cellReference, _formulaParserService);
+
+        return result;
     }
 
     private string? ProcessResult(string cellReference, ValueEvaluationResult result)
@@ -98,11 +105,11 @@ public class SpreadsheetService : ISpreadsheetService
             var dependants = _dependencyTree.GetDependants(current);
             foreach (var dependant in dependants)
             {
-                var formula = _cellStorage.GetCellFormula(dependant);
+                UpdateCellValue(dependant);
 
-                var result = _formulaParserService.Evaluate(formula);
-                ProcessResult(dependant, result);
-
+                // Dependencies cannot change during execution of RecalculateDependants function
+                // so we can skip updating them
+                
                 stack.Push(dependant);
             }
         }
