@@ -21,7 +21,7 @@ namespace ExcelClone.Views;
 public partial class SpreadsheetPage : ContentPage
 {
     private bool _initialized = false;
-    private bool _shouldGetNewDimensionsUponAppearing = false;
+    private readonly bool _shouldGetNewDimensionsUponAppearing = false;
     readonly TableFileService _tableFileService = new();
     private bool _isScrolling = false;
     private int _currentColumns = 0;
