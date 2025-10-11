@@ -1,10 +1,10 @@
-using ExcelClone.Components;
+using ExcelClone.Components.CellStorage;
+using ExcelClone.Components.Trees;
 using ExcelClone.Constants;
 using ExcelClone.Evaluators;
 using ExcelClone.Evaluators.Parsers;
 using ExcelClone.Evaluators.Tokens;
 using ExcelClone.Services;
-using ExcelClone.Values;
 
 namespace Tests.Components;
 

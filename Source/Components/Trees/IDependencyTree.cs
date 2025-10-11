@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace ExcelClone.Components;
+namespace ExcelClone.Components.Trees;
 
 public interface IDependencyTree
 {

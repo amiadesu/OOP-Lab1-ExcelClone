@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
-using ExcelClone.Components;
+using ExcelClone.Components.CellStorage;
+using ExcelClone.Components.Trees;
 using ExcelClone.Resources.Localization;
 using ExcelClone.Types;
 using ExcelClone.Utils;

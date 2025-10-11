@@ -5,7 +5,7 @@ using ExcelClone.Values;
 using ExcelClone.Types;
 using System;
 
-namespace ExcelClone.Components;
+namespace ExcelClone.Components.CellStorage;
 
 public class Spreadsheet : ICellStorage
 {

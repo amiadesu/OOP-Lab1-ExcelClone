@@ -6,9 +6,10 @@ using ExcelClone.Types;
 using ExcelClone.Utils;
 using ExcelClone.Values;
 
-namespace ExcelClone.Components;
+namespace ExcelClone.Components.CellStorage;
 
-public class SpreadsheetCell {
+public class SpreadsheetCell
+{
     public CellValue Value { get; private set; } = new CellValue(CellValueType.Text);
     public string Formula { get; private set; } = "";
 

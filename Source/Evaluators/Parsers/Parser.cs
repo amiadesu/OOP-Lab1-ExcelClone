@@ -6,7 +6,7 @@ using ExcelClone.Values;
 using ExcelClone.Utils;
 using ExcelClone.Resources.Localization;
 using ExcelClone.Exceptions;
-using ExcelClone.Components;
+using ExcelClone.Components.CellStorage;
 using System.Diagnostics;
 
 namespace ExcelClone.Evaluators.Parsers;
