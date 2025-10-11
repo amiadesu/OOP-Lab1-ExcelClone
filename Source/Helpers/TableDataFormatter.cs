@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using System.Text;
-using ExcelClone.Components;
+using ExcelClone.Components.CellStorage;
 using ExcelClone.Resources.Localization;
 using ExcelClone.Services;
 using ExcelClone.Utils;

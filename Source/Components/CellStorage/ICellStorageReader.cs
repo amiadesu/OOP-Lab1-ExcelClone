@@ -1,6 +1,6 @@
 using ExcelClone.Values;
 
-namespace ExcelClone.Components;
+namespace ExcelClone.Components.CellStorage;
 
 public interface ICellStorageReader
 {

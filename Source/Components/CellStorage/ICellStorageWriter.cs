@@ -2,7 +2,7 @@ using ExcelClone.Services;
 using ExcelClone.Types;
 using ExcelClone.Values;
 
-namespace ExcelClone.Components;
+namespace ExcelClone.Components.CellStorage;
 
 public interface ICellStorageWriter
 {

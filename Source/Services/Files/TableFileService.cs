@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Maui.Devices;
 using Microsoft.Maui.Storage;
 using CommunityToolkit.Maui.Storage;
-using ExcelClone.Components;
+using ExcelClone.Components.CellStorage;
 using ExcelClone.Resources.Localization;
 using ExcelClone.Services;
 using ExcelClone.Utils;

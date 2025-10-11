@@ -1,4 +1,4 @@
-using ExcelClone.Components;
+using ExcelClone.Components.CellStorage;
 using ExcelClone.Services;
 
 namespace Tests.Components;

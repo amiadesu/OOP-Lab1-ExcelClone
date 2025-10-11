@@ -1,4 +1,4 @@
-using ExcelClone.Components;
+using ExcelClone.Components.Trees;
 
 namespace Tests.Components;
 

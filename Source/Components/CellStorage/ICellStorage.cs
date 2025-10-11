@@ -1,4 +1,4 @@
-namespace ExcelClone.Components;
+namespace ExcelClone.Components.CellStorage;
 
 public interface ICellStorage : ICellStorageReader, ICellStorageWriter
 {
