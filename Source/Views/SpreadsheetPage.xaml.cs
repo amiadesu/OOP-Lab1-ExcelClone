@@ -14,12 +14,14 @@ using ExcelClone.Constants;
 using ExcelClone.Evaluators.Tokens;
 using ExcelClone.Evaluators;
 using ExcelClone.Evaluators.Parsers;
+using Microsoft.Maui.ApplicationModel;
 
 namespace ExcelClone.Views;
 
 public partial class SpreadsheetPage : ContentPage
 {
     private bool _initialized = false;
+    private bool _shouldGetNewDimensionsUponAppearing = false;
     readonly TableFileService _tableFileService = new();
     private bool _isScrolling = false;
     private int _currentColumns = 0;
@@ -55,7 +57,7 @@ public partial class SpreadsheetPage : ContentPage
 
         _spreadsheetService = new SpreadsheetService(_spreadsheet, _dependencyTree, _formulaParser);
 
-        GenerateExcelGrid(true);
+        _shouldGetNewDimensionsUponAppearing = true;
     }
 
     public SpreadsheetPage(string tablePath, string tableFileName)
@@ -91,7 +93,7 @@ public partial class SpreadsheetPage : ContentPage
 
         RecalculateAllCells();
 
-        GenerateExcelGrid(false);
+        _shouldGetNewDimensionsUponAppearing = false;
     }
 
     public SpreadsheetPage(ICellStorage spreadsheet, ICellNameService cellNameService, string tableFileName)
@@ -118,10 +120,10 @@ public partial class SpreadsheetPage : ContentPage
 
         RecalculateAllCells();
 
-        GenerateExcelGrid(false);
+        _shouldGetNewDimensionsUponAppearing = false;
     }
 
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
 
@@ -129,6 +131,8 @@ public partial class SpreadsheetPage : ContentPage
             return;
 
         _initialized = true;
+
+        await GenerateExcelGrid(_shouldGetNewDimensionsUponAppearing);
 
         this.Title = _fileName;
 
@@ -154,28 +158,39 @@ public partial class SpreadsheetPage : ContentPage
         }
     }
 
-    private void OnGenerateClicked(object sender, EventArgs e)
+    private async void OnGenerateClicked(object sender, EventArgs e)
     {
-        GenerateExcelGrid(true);
+        await GenerateExcelGrid(true);
     }
 
     private async void OnHomeClicked(object sender, EventArgs e)
     {
         bool result = await OpenConfirmation();
         if (result)
+        {
+            SetLoading(true);
             await Shell.Current.Navigation.PushAsync(new StartingPage());
+            SetLoading(false);
+        }
+            
     }
 
     private async void OnHelpClicked(object sender, EventArgs e)
     {
         bool result = await OpenConfirmation();
         if (result)
+        {
+            SetLoading(true);
             await Shell.Current.Navigation.PushAsync(new HelpPage());
+            SetLoading(false);
+        }
     }
 
     private async void OnSaveClicked(object sender, EventArgs e)
     {
+        SetLoading(true);
         string result = await _tableFileService.SaveLocally(_spreadsheet, _fileName);
+        SetLoading(false);
         await DisplayAlert(
             DataProcessor.FormatResource(
                 AppResources.SavingResult
@@ -189,7 +204,9 @@ public partial class SpreadsheetPage : ContentPage
 
     private async void OnGoogleDriveSaveClicked(object sender, EventArgs e)
     {
+        SetLoading(true);
         await Shell.Current.Navigation.PushAsync(new GoogleDriveSavePage(_spreadsheet, _cellNameService, _fileName));
+        SetLoading(false);
     }
 
     private void UpdateDimensionsInputs()
@@ -232,22 +249,28 @@ public partial class SpreadsheetPage : ContentPage
         _spreadsheet.CreateNewCellStorage(_currentColumns, _currentRows);
     }
 
-    private void GenerateExcelGrid(bool getNewDimensions = true)
+    private async Task GenerateExcelGrid(bool getNewDimensions = true)
     {
-        if (getNewDimensions)
-        {
-            GetDimensionsAndGenerateSpreadsheet();
-        }
-        else
-        {
-            _currentColumns = _spreadsheet.GetColumns();
-            _currentRows = _spreadsheet.GetRows();
-            UpdateDimensionsInputs();
-        }
+        SetLoading(true);
 
-        GenerateWithClock();
+        await Task.Run(() =>
+        {
+            if (getNewDimensions)
+            {
+                GetDimensionsAndGenerateSpreadsheet();
+            }
+            else
+            {
+                _currentColumns = _spreadsheet.GetColumns();
+                _currentRows = _spreadsheet.GetRows();
+                MainThread.BeginInvokeOnMainThread(UpdateDimensionsInputs);
+            }
+
+            MainThread.BeginInvokeOnMainThread(GenerateWithClock);
+        });
 
         UpdateAllCellDisplays();
+        SetLoading(false);
     }
 
     private void ClearEverything()
@@ -520,5 +543,11 @@ public partial class SpreadsheetPage : ContentPage
         );
 
         return result;
+    }
+
+    private void SetLoading(bool isLoading)
+    {
+        LoadingIndicator.IsRunning = isLoading;
+        LoadingIndicator.IsVisible = isLoading;
     }
 }

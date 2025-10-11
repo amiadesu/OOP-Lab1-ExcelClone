@@ -7,9 +7,19 @@
 
     <Grid RowDefinitions="Auto,*" Padding="20">
         <VerticalStackLayout Grid.Row="0">
-            <Label Text="{x:Static locales:AppResources.HelpPage}" 
-                   FontSize="24" 
-                   HorizontalOptions="Center" />
+              <Grid ColumnDefinitions="*,Auto" Padding="2" HorizontalOptions="Fill">
+                     <Label Text="{x:Static locales:AppResources.HelpPage}" 
+                            FontSize="24" 
+                            HorizontalOptions="Center" />
+
+                     <ActivityIndicator x:Name="LoadingIndicator"
+                                          IsRunning="False"
+                                          IsVisible="False"
+                                          WidthRequest="30"
+                                          HeightRequest="30"
+                                          HorizontalOptions="End"
+                                          VerticalOptions="Center"/>
+              </Grid>
 
             <Button Text="{x:Static locales:AppResources.HomePage}"
                     Clicked="OnHomePageClicked"

@@ -6,10 +6,19 @@
     Title="{x:Static locales:AppResources.ApplicationName}">
 
     <Grid Padding="20" RowDefinitions="Auto,*">
-        <Label Grid.Row="0"
-               Text="{x:Static locales:AppResources.GoogleDriveSavePage}" 
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Padding="2" HorizontalOptions="Fill">
+            <Label Text="{x:Static locales:AppResources.GoogleDriveSavePage}" 
                FontSize="24" 
                HorizontalOptions="Center" />
+
+            <ActivityIndicator x:Name="LoadingIndicator"
+                            IsRunning="False"
+                            IsVisible="False"
+                            WidthRequest="30"
+                            HeightRequest="30"
+                            HorizontalOptions="End"
+                            VerticalOptions="Center"/>
+        </Grid>
 
         <Grid Grid.Row="1" RowDefinitions="*" Padding="20">
             <VerticalStackLayout Grid.Row="0">

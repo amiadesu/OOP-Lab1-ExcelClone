@@ -57,6 +57,7 @@ public partial class GoogleDriveSavePage : ContentPage
 
         FileNameEntry.Text = _fileName;
 
+        SetLoading(true);
         try
         {
             await _googleDriveService.Init();
@@ -71,27 +72,36 @@ public partial class GoogleDriveSavePage : ContentPage
                 e.Message
             );
         }
+        SetLoading(false);
     }
 
-    private static async void OnHomePageClicked(object sender, EventArgs e)
+    private async void OnHomePageClicked(object sender, EventArgs e)
     {
+        SetLoading(true);
         await Shell.Current.Navigation.PushAsync(new StartingPage());
+        SetLoading(false);
     }
 
     private async void OnReturnClicked(object sender, EventArgs e)
     {
+        SetLoading(true);
         await Shell.Current.Navigation.PushAsync(new SpreadsheetPage(_cellStorage, _cellNameService, _fullFileName));
+        SetLoading(false);
     }
 
     private async void OnSignInClicked(object sender, EventArgs e)
     {
+        SetLoading(true);
         await Authorize();
+        SetLoading(false);
     }
 
     private async void OnSaveClicked(object sender, EventArgs e)
     {
+        SetLoading(true);
         _fileName = FileNameEntry.Text;
         var result = await _tableFileService.SaveToGoogleDrive(_cellStorage, _googleDriveService, _fullFileName);
+        SetLoading(false);
 
         await DisplayAlert(
             DataProcessor.FormatResource(
@@ -157,5 +167,11 @@ public partial class GoogleDriveSavePage : ContentPage
             DataProcessor.FormatResource(
                 AppResources.OK
         ));
+    }
+
+    private void SetLoading(bool isLoading)
+    {
+        LoadingIndicator.IsRunning = isLoading;
+        LoadingIndicator.IsVisible = isLoading;
     }
 }

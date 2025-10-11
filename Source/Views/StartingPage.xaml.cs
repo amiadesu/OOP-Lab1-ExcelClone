@@ -25,17 +25,23 @@ public partial class StartingPage : ContentPage
 
         _initialized = true;
 
+        SetLoading(true);
         await GenerateRecentFileObjects();
+        SetLoading(false);
     }
 
-    private static async void OnOpenSpreadsheetClicked(object sender, EventArgs e)
+    private async void OnOpenSpreadsheetClicked(object sender, EventArgs e)
     {
+        SetLoading(true);
         await Shell.Current.Navigation.PushAsync(new SpreadsheetPage());
+        SetLoading(false);
     }
 
-    private static async void OnHelpPageClicked(object sender, EventArgs e)
+    private async void OnHelpPageClicked(object sender, EventArgs e)
     {
+        SetLoading(true);
         await Shell.Current.Navigation.PushAsync(new HelpPage());
+        SetLoading(false);
     }
 
     private async void OnOpenFilesClicked(object sender, EventArgs e)
@@ -65,14 +71,18 @@ public partial class StartingPage : ContentPage
 
     private async void OnClearRecentFilesClicked(object sender, EventArgs e)
     {
+        SetLoading(true);
         await FileHistoryService.ClearHistoryAsync();
         await GenerateRecentFileObjects();
+        SetLoading(false);
     }
 
     private async Task OpenFile(string fileName, string filePath)
     {
+        SetLoading(true);
         await FileHistoryService.AddEntryAsync(fileName, filePath);
         await Shell.Current.Navigation.PushAsync(new SpreadsheetPage(filePath, fileName));
+        SetLoading(false);
     }
 
     private async Task GenerateRecentFileObjects()
@@ -97,8 +107,16 @@ public partial class StartingPage : ContentPage
         }
     }
 
-    private static async void OnViewGoogleDriveFilesClicked(object sender, EventArgs e)
+    private async void OnViewGoogleDriveFilesClicked(object sender, EventArgs e)
     {
+        SetLoading(true);
         await Shell.Current.Navigation.PushAsync(new GoogleDriveFilesPage());
+        SetLoading(false);
+    }
+    
+    private void SetLoading(bool isLoading)
+    {
+        LoadingIndicator.IsRunning = isLoading;
+        LoadingIndicator.IsVisible = isLoading;
     }
 }

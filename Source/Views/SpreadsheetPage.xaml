@@ -103,11 +103,21 @@
             </Grid>
         </Border>
 
-        <Label x:Name="StatusLabel"
-                Grid.Row="2"
+        <Grid Grid.Row="2" ColumnDefinitions="*,Auto" Padding="2" HorizontalOptions="Fill" HeightRequest="30">
+            <Label x:Name="StatusLabel"
                 Text=""
                 FontSize="14"
-                HorizontalOptions="Center"/>
+                HorizontalOptions="Center"
+                VerticalOptions="Center"/>
+
+            <ActivityIndicator x:Name="LoadingIndicator"
+                            IsRunning="False"
+                            IsVisible="False"
+                            WidthRequest="25"
+                            HeightRequest="25"
+                            HorizontalOptions="End"
+                            VerticalOptions="Center"/>
+        </Grid>
 
         <!-- Grid Container -->
         <Border x:Name="GridContainer"

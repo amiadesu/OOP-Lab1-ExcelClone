@@ -1,4 +1,5 @@
 using Microsoft.Maui.Controls;
+using Microsoft.Maui.Platform;
 using System;
 using ExcelClone.FileSystem;
 using System.Threading.Tasks;
@@ -32,6 +33,7 @@ public partial class GoogleDriveFilesPage : ContentPage
 
         _initialized = true;
 
+        SetLoading(true);
         try
         {
             await _googleDriveService.Init();
@@ -51,15 +53,19 @@ public partial class GoogleDriveFilesPage : ContentPage
                 e.Message
             );
         }
+        SetLoading(false);
     }
 
-    private static async void OnHomePageClicked(object sender, EventArgs e)
+    private async void OnHomePageClicked(object sender, EventArgs e)
     {
+        SetLoading(true);
         await Shell.Current.Navigation.PushAsync(new StartingPage());
+        SetLoading(false);
     }
 
     private async Task OpenFile(string fileName, string fileId)
     {
+        SetLoading(true);
         try
         {
             var spreadsheet = await _tableFileService.LoadFromGoogleDrive(fileId, _googleDriveService, _cellNameService);
@@ -75,6 +81,7 @@ public partial class GoogleDriveFilesPage : ContentPage
                 e.Message
             );
         }
+        SetLoading(false);
     }
 
     private async Task GenerateGoogleDriveFileObjects()
@@ -114,19 +121,24 @@ public partial class GoogleDriveFilesPage : ContentPage
 
     private async void OnSignInClicked(object sender, EventArgs e)
     {
+        SetLoading(true);
         await Authorize();
+        SetLoading(false);
     }
 
     private async void OnUpdateClicked(object sender, EventArgs e)
     {
+        SetLoading(true);
         GoogleDriveItemsContainer.Clear();
         await GenerateGoogleDriveFileObjects();
+        SetLoading(false);
     }
 
     private async Task Authorize()
     {
         try
         {
+            GoogleDriveItemsContainer.Clear();
             if (!_authorized)
             {
                 await _googleDriveService.SignIn();
@@ -176,5 +188,11 @@ public partial class GoogleDriveFilesPage : ContentPage
             DataProcessor.FormatResource(
                 AppResources.OK
         ));
+    }
+
+    private void SetLoading(bool isLoading)
+    {
+        LoadingIndicator.IsRunning = isLoading;
+        LoadingIndicator.IsVisible = isLoading;
     }
 }
