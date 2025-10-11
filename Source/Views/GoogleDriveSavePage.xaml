@@ -1,0 +1,60 @@
+<ContentPage 
+    x:Class="ExcelClone.Views.GoogleDriveSavePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:locales="clr-namespace:ExcelClone.Resources.Localization"
+    Title="ExcelClone">
+
+    <Grid Padding="20" RowDefinitions="Auto,*">
+        <Label Grid.Row="0"
+               Text="{x:Static locales:AppResources.GoogleDriveSavePage}" 
+               FontSize="24" 
+               HorizontalOptions="Center" />
+
+        <Grid Grid.Row="1" RowDefinitions="*" Padding="20">
+            <VerticalStackLayout Grid.Row="0">
+                <Button Text="{x:Static locales:AppResources.HomePage}"
+                        Clicked="OnHomePageClicked"
+                        Margin="5,10"
+                        BackgroundColor="#217346"
+                        TextColor="White"/>
+
+                <Button Text="{x:Static locales:AppResources.Return}"
+                        Clicked="OnReturnClicked"
+                        Margin="5,10"
+                        BackgroundColor="#217346"
+                        TextColor="White"/>
+
+                <Button Text="{x:Static locales:AppResources.SignIn}"
+                    x:Name="SignInButton"
+                    Clicked="OnSignInClicked"
+                    Margin="5,10"
+                    BackgroundColor="#217346"
+                    TextColor="White"/>
+
+                <Grid ColumnDefinitions="Auto,*"
+                        RowDefinitions="Auto"
+                        ColumnSpacing="10"
+                        RowSpacing="10">
+                    <Label Text="{x:Static locales:AppResources.EnterFileName}"
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            VerticalOptions="Center"/>
+                    <Entry x:Name="FileNameEntry"
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            Text="10"/>
+                </Grid>
+                
+
+                <Button Text="{x:Static locales:AppResources.SaveToGoogleDrive}"
+                    x:Name="SaveButton"
+                    Clicked="OnSaveClicked"
+                    Margin="5,10"
+                    BackgroundColor="#217346"
+                    TextColor="White"
+                    IsVisible="False" />
+            </VerticalStackLayout>
+        </Grid>
+    </Grid>
+</ContentPage>
