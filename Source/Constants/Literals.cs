@@ -22,4 +22,7 @@ public static class Literals
     public const string doubleFormatMask = "0.############";
     // 1e-13 because we store 12 digits after the dot in our spreadsheet
     public const double comparisonTolerance = 1e-13;
+
+    public const string authURL = "https://accounts.google.com/o/oauth2/v2/auth";
+    public const int authFlowPort = 42135;
 }
