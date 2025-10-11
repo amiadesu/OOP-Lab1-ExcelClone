@@ -4,7 +4,6 @@ using Google.Apis.Oauth2.v2;
 using Google.Apis.Services;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Devices;
-using Microsoft.Maui.Storage;
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -16,6 +15,7 @@ using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using System.Net.Http;
 using ExcelClone.Constants;
+using ExcelClone.Services.TokenStorage;
 
 namespace ExcelClone.Services.GoogleDrive.Auth;
 
@@ -24,16 +24,22 @@ public class WindowsGoogleDriveAuthService : IGoogleDriveAuthService
     private static string _windowsClientId = Secrets.windowsGoogleDriveClientId; // UWP
     private static string _authURL = Literals.authURL;
 
+    private readonly ITokenStorage _tokenStorage;
     private HttpListener? _listener = null;
-    GoogleCredential? _credential;
-    string? _email;
+    private GoogleCredential? _credential;
+    private string? _email;
 
     public bool IsSignedIn => _credential != null;
     public string? Email => _email;
 
+    public WindowsGoogleDriveAuthService()
+    {
+        _tokenStorage = new TokenStorage.TokenStorage(Literals.authBufferSeconds);
+    }
+
     public async Task Init()
     {
-        var hasRefreshToken = await SecureStorage.GetAsync("refresh_token") is not null;
+        var hasRefreshToken = await _tokenStorage.Exists("refresh_token");
         if (!IsSignedIn && hasRefreshToken)
         {
             await SignIn();
@@ -42,40 +48,72 @@ public class WindowsGoogleDriveAuthService : IGoogleDriveAuthService
 
     public async Task<GoogleCredential?> SignIn()
     {
-        var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        var expiresIn = Preferences.Get("access_token_epires_in", 0L);
-        var isExpired = now > expiresIn - 10; // 10 second buffer
-        var hasRefreshToken = await SecureStorage.GetAsync("refresh_token") is not null;
-
-        if (isExpired && hasRefreshToken)
+        try
         {
-            Trace.TraceInformation("Using refresh token");
-            await RefreshToken();
+            var accessToken = await GetValidAccessToken();
+            _credential = GoogleCredential.FromAccessToken(accessToken);
+
+            await VerifyAuthorization();
+
+            return _credential;
         }
-        else if (isExpired) // No refresh token
+        catch (Exception ex)
         {
-            Trace.TraceInformation("Starting auth code flow");
-            if (DeviceInfo.Current.Platform == DevicePlatform.WinUI)
+            Trace.TraceError($"SignIn failed: {ex}");
+            throw;
+        }
+    }
+
+    private async Task<string> GetValidAccessToken()
+    {
+        var tokenInfo = await _tokenStorage.GetTokenValue("access_token");
+        string? accessToken = tokenInfo.Value;
+        bool expired = _tokenStorage.IsExpired("access_token");
+        bool hasRefreshToken = await _tokenStorage.Exists("refresh_token");
+
+        if (string.IsNullOrEmpty(accessToken) || expired)
+        {
+            if (hasRefreshToken)
             {
-                await DoAuthCodeFlowWindows();
+                accessToken = await TryRefreshToken();
             }
-            else
+
+            if (string.IsNullOrEmpty(accessToken))
             {
-                throw new NotImplementedException($"Auth flow for platform {DeviceInfo.Current.Platform} not implemented");
+                accessToken = await StartAuthCodeFlow();
             }
         }
 
-        var accesToken = await SecureStorage.GetAsync("access_token");
-        _credential = GoogleCredential.FromAccessToken(accesToken);
-        var _oauth2Service = new Oauth2Service(new BaseClientService.Initializer
+        if (string.IsNullOrEmpty(accessToken))
+            throw new InvalidOperationException("Access token missing after authorization flow");
+
+        return accessToken;
+    }
+
+    private async Task VerifyAuthorization()
+    {
+        var oauth2Service = new Oauth2Service(new BaseClientService.Initializer
         {
             HttpClientInitializer = _credential,
             ApplicationName = "ExcelCloneUniversityProject"
         });
-        var userInfo = await _oauth2Service.Userinfo.Get().ExecuteAsync();
-        _email = userInfo.Email;
 
-        return _credential;
+        try
+        {
+            var userInfo = await oauth2Service.Userinfo.Get().ExecuteAsync();
+            _email = userInfo.Email;
+        }
+        catch (Google.GoogleApiException ex) when (ex.HttpStatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            Trace.TraceWarning("Access token unauthorized, restarting auth flow...");
+            DeleteTokens();
+
+            var accessToken = await StartAuthCodeFlow();
+            _credential = GoogleCredential.FromAccessToken(accessToken);
+
+            var retryUserInfo = await oauth2Service.Userinfo.Get().ExecuteAsync();
+            _email = retryUserInfo.Email;
+        }
     }
 
     public async Task SignOut()
@@ -83,8 +121,21 @@ public class WindowsGoogleDriveAuthService : IGoogleDriveAuthService
         await RevokeTokens();
     }
 
+    private async Task<string?> StartAuthCodeFlow()
+    {
+        await DoAuthCodeFlowWindows();
+
+        return (await _tokenStorage.GetTokenValue("access_token")).Value;
+    }
+
     private async Task DoAuthCodeFlowWindows()
     {
+        Trace.TraceInformation("Starting auth code flow");
+        if (DeviceInfo.Current.Platform != DevicePlatform.WinUI)
+        {
+            throw new NotImplementedException($"Auth flow for platform {DeviceInfo.Current.Platform} not implemented");
+        }
+
         var authUrl = _authURL;
         var clientId = _windowsClientId;
         var localPort = Literals.authFlowPort;
@@ -119,7 +170,7 @@ public class WindowsGoogleDriveAuthService : IGoogleDriveAuthService
         };
     }
 
-    private static async Task GetInitialToken(string authorizationCode, string redirectUri, string clientId, string codeVerifier)
+    private async Task GetInitialToken(string authorizationCode, string redirectUri, string clientId, string codeVerifier)
     {
         var tokenEndpoint = "https://oauth2.googleapis.com/token";
         var client = new HttpClient();
@@ -149,17 +200,31 @@ public class WindowsGoogleDriveAuthService : IGoogleDriveAuthService
         var jsonToken = JsonObject.Parse(responseBody);
         var accessToken = jsonToken!["access_token"]!.ToString();
         var refreshToken = jsonToken!["refresh_token"]!.ToString();
-        var accessTokenExpiresIn = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + int.Parse(jsonToken!["expires_in"]!.ToString());
-        await SecureStorage.SetAsync("access_token", accessToken);
-        await SecureStorage.SetAsync("refresh_token", refreshToken);
-        Preferences.Set("access_token_epires_in", accessTokenExpiresIn);
+        var accessTokenExpiresIn = int.Parse(jsonToken!["expires_in"]!.ToString());
+        await _tokenStorage.SetToken("access_token", accessToken, accessTokenExpiresIn);
+        await _tokenStorage.SetToken("refresh_token", refreshToken);
+    }
+
+    private async Task<string?> TryRefreshToken()
+    {
+        try
+        {
+            await RefreshToken();
+            return (await _tokenStorage.GetTokenValue("access_token")).Value;
+        }
+        catch (Exception ex)
+        {
+            Trace.TraceWarning($"Failed to refresh token: {ex.Message}");
+            DeleteTokens();
+            return null;
+        }
     }
 
     private async Task RefreshToken()
     {
         var clientId = _windowsClientId;
         var tokenEndpoint = "https://oauth2.googleapis.com/token";
-        var refreshToken = await SecureStorage.GetAsync("refresh_token");
+        var refreshToken = (await _tokenStorage.GetTokenValue("refresh_token")).Value;
         var client = new HttpClient();
         var tokenRequest = new HttpRequestMessage(HttpMethod.Post, tokenEndpoint)
         {
@@ -185,21 +250,20 @@ public class WindowsGoogleDriveAuthService : IGoogleDriveAuthService
 
         var jsonToken = JsonObject.Parse(responseBody);
         var accessToken = jsonToken!["access_token"]!.ToString();
-        var accessTokenExpiresIn = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + int.Parse(jsonToken!["expires_in"]!.ToString());
-        await SecureStorage.SetAsync("access_token", accessToken);
-        Preferences.Set("access_token_epires_in", accessTokenExpiresIn);
+        var accessTokenExpiresIn = int.Parse(jsonToken!["expires_in"]!.ToString());
+        await _tokenStorage.SetToken("access_token", accessToken, accessTokenExpiresIn);
     }
 
     private async Task RevokeTokens()
     {
         var revokeEndpoint = "https://oauth2.googleapis.com/revoke";
-        var access_token = await SecureStorage.GetAsync("access_token");
+        var accessToken = (await _tokenStorage.GetTokenValue("access_token")).Value;
         var client = new HttpClient();
         var tokenRequest = new HttpRequestMessage(HttpMethod.Post, revokeEndpoint)
         {
             Content = new FormUrlEncodedContent(
                 [
-                    new KeyValuePair<string, string>("token", access_token!),
+                    new KeyValuePair<string, string>("token", accessToken!),
                 ]
             )
         };
@@ -214,11 +278,16 @@ public class WindowsGoogleDriveAuthService : IGoogleDriveAuthService
         }
 
         Trace.TraceInformation($"Revoke token: {responseBody}");
-        SecureStorage.Remove("access_token");
-        SecureStorage.Remove("refresh_token");
-        Preferences.Remove("access_token_epires_in");
+
+        DeleteTokens();
 
         _credential = null;
+    }
+
+    private void DeleteTokens()
+    {
+        _tokenStorage.DeleteToken("access_token");
+        _tokenStorage.DeleteToken("refresh_token");
     }
 
     private async Task<string> StartLocalHttpServerAsync(int port)
