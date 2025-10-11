@@ -421,4 +421,12 @@
     <value>Введіть назву файлу:</value>
     <comment/>
   </data>
+  <data name="ApplicationName" xml:space="preserve">
+    <value>ExcelClone</value>
+    <comment/>
+  </data>
+  <data name="ApplicationNameEditingFile" xml:space="preserve">
+    <value>ExcelClone (редагується {FileName})</value>
+    <comment/>
+  </data>
 </root>

@@ -19,6 +19,7 @@ namespace ExcelClone.Views;
 
 public partial class SpreadsheetPage : ContentPage
 {
+    private bool _initialized = false;
     readonly TableFileService _tableFileService = new();
     private bool _isScrolling = false;
     private int _currentColumns = 0;
@@ -118,6 +119,39 @@ public partial class SpreadsheetPage : ContentPage
         RecalculateAllCells();
 
         GenerateExcelGrid(false);
+    }
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+
+        if (_initialized)
+            return;
+
+        _initialized = true;
+
+        this.Title = _fileName;
+
+        if (Application.Current is not null && Application.Current.Windows.Count > 0)
+        {
+            Application.Current.Windows[0].Title = DataProcessor.FormatResource(
+                AppResources.ApplicationNameEditingFile,
+                ("FileName", _fileName)
+            );
+        }
+    }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+
+        if (Application.Current is not null && Application.Current.Windows.Count > 0)
+        {
+            Application.Current.Windows[0].Title = DataProcessor.FormatResource(
+                AppResources.ApplicationName,
+                ("FileName", _fileName)
+            );
+        }
     }
 
     private void OnGenerateClicked(object sender, EventArgs e)

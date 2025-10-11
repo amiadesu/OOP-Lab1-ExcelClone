@@ -483,9 +483,25 @@ namespace ExcelClone.Resources.Localization {
             }
         }
 
-        public static string EnterFileName {
-            get {
+        public static string EnterFileName
+        {
+            get
+            {
                 return ResourceManager.GetString("EnterFileName", resourceCulture);
+            }
+        }
+        
+        public static string ApplicationName
+        {
+            get
+            {
+                return ResourceManager.GetString("ApplicationName", resourceCulture);
+            }
+        }
+        
+        public static string ApplicationNameEditingFile {
+            get {
+                return ResourceManager.GetString("ApplicationNameEditingFile", resourceCulture);
             }
         }
 
