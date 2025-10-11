@@ -60,7 +60,16 @@ public partial class SpreadsheetPage : ContentPage
         InitializeComponent();
 
         _cellNameService = new CellNameService();
-        _spreadsheet = TableFileService.LoadFromPath(tablePath, _cellNameService);
+        
+        try
+        {
+            _spreadsheet = TableFileService.LoadFromPath(tablePath, _cellNameService);
+        }
+        catch (Exception e)
+        {
+            Trace.TraceError($"Error while opening file: {e}");
+            _spreadsheet = new Spreadsheet(_cellNameService);
+        }
 
         _dependencyTree = new DependencyTree();
 

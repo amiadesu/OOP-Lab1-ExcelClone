@@ -6,6 +6,7 @@ using ExcelClone.Utils;
 using ExcelClone.Resources.Localization;
 using ExcelClone.Services.GoogleDrive;
 using ExcelClone.Services;
+using System.Diagnostics;
 
 namespace ExcelClone.Views;
 
@@ -58,8 +59,21 @@ public partial class GoogleDriveFilesPage : ContentPage
 
     private async Task OpenFile(string fileName, string fileId)
     {
-        var spreadsheet = await TableFileService.LoadFromGoogleDrive(fileId, _googleDriveService, _cellNameService);
-        await Shell.Current.Navigation.PushAsync(new SpreadsheetPage(spreadsheet, _cellNameService, fileName));
+        try
+        {
+            var spreadsheet = await TableFileService.LoadFromGoogleDrive(fileId, _googleDriveService, _cellNameService);
+            await Shell.Current.Navigation.PushAsync(new SpreadsheetPage(spreadsheet, _cellNameService, fileName));
+        }
+        catch (Exception e)
+        {
+            Trace.TraceError($"Exception while downloading file: {e}");
+            ShowError(
+                DataProcessor.FormatResource(
+                    AppResources.Error
+                ),
+                e.Message
+            );
+        }
     }
 
     private async Task GenerateGoogleDriveFileObjects()
