@@ -14,5 +14,6 @@ public interface IGoogleDriveService
     public Task<List<Google.Apis.Drive.v3.Data.File>> GetFiles(string? fileExtension = null);
     public Task<string> DownloadFileAsync(string fileId);
     public Task<Google.Apis.Drive.v3.Data.File> UploadFileAsync(string fileName, Stream content, string mimeType);
+    public Task<Google.Apis.Drive.v3.Data.File> UploadOrReplaceFileAsync(string fileName, Stream content, string mimeType);
     public Task SignOut();
 }

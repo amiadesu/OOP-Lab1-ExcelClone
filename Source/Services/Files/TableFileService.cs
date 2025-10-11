@@ -51,7 +51,7 @@ public class TableFileService
 
             var stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
 
-            var file = await googleDriveService.UploadFileAsync(fileName, stream, "text/plain");
+            var file = await googleDriveService.UploadOrReplaceFileAsync(fileName, stream, "text/plain");
 
             return DataProcessor.FormatResource(
                 AppResources.FileSavedSuccessfully,
