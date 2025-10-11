@@ -109,7 +109,7 @@ public partial class GoogleDriveSavePage : ContentPage
     {
         try
         {
-            if (_authorized)
+            if (!_authorized)
             {
                 await _googleDriveService.SignIn();
             }

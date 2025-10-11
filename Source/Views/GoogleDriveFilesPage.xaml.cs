@@ -127,7 +127,7 @@ public partial class GoogleDriveFilesPage : ContentPage
     {
         try
         {
-            if (_authorized)
+            if (!_authorized)
             {
                 await _googleDriveService.SignIn();
             }
