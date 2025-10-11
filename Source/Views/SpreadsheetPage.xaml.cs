@@ -18,6 +18,7 @@ namespace ExcelClone.Views;
 
 public partial class SpreadsheetPage : ContentPage
 {
+    readonly TableFileService _tableFileService = new();
     private bool _isScrolling = false;
     private int _currentColumns = 0;
     private int _currentRows = 0;
@@ -60,7 +61,43 @@ public partial class SpreadsheetPage : ContentPage
         InitializeComponent();
 
         _cellNameService = new CellNameService();
-        _spreadsheet = TableFileService.Load(tablePath, _cellNameService);
+
+        try
+        {
+            _spreadsheet = _tableFileService.LoadFromPath(tablePath, _cellNameService);
+        }
+        catch (Exception e)
+        {
+            Trace.TraceError($"Error while opening file: {e}");
+            _spreadsheet = new Spreadsheet(_cellNameService);
+        }
+
+        _dependencyTree = new DependencyTree();
+
+        _parser = new Parser(_spreadsheet);
+
+        _formulaTokenizer = new FormulaTokenizer();
+        _formulaEvaluator = new FormulaEvaluator(_parser);
+
+        _formulaParser = new FormulaParserService(_formulaTokenizer, _formulaEvaluator);
+
+        _spreadsheetService = new SpreadsheetService(_spreadsheet, _dependencyTree, _formulaParser);
+
+        _currentColumns = _spreadsheet.GetColumns();
+        _currentRows = _spreadsheet.GetRows();
+        _fileName = tableFileName;
+
+        RecalculateAllCells();
+
+        GenerateExcelGrid(false);
+    }
+
+    public SpreadsheetPage(ICellStorage spreadsheet, ICellNameService cellNameService, string tableFileName)
+    {
+        InitializeComponent();
+
+        _cellNameService = cellNameService;
+        _spreadsheet = spreadsheet;
 
         _dependencyTree = new DependencyTree();
 
@@ -103,7 +140,7 @@ public partial class SpreadsheetPage : ContentPage
 
     private async void OnSaveClicked(object sender, EventArgs e)
     {
-        string result = await TableFileService.Save(_spreadsheet, _fileName);
+        string result = await _tableFileService.SaveLocally(_spreadsheet, _fileName);
         await DisplayAlert(
             DataProcessor.FormatResource(
                 AppResources.SavingResult
@@ -113,6 +150,11 @@ public partial class SpreadsheetPage : ContentPage
                 AppResources.OK
             )
         );
+    }
+
+    private async void OnGoogleDriveSaveClicked(object sender, EventArgs e)
+    {
+        await Shell.Current.Navigation.PushAsync(new GoogleDriveSavePage(_spreadsheet, _cellNameService, _fileName));
     }
 
     private void UpdateDimensionsInputs()

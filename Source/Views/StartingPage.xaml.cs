@@ -96,4 +96,9 @@ public partial class StartingPage : ContentPage
             }
         }
     }
+
+    private static async void OnViewGoogleDriveFilesClicked(object sender, EventArgs e)
+    {
+        await Shell.Current.Navigation.PushAsync(new GoogleDriveFilesPage());
+    }
 }

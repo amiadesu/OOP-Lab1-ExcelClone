@@ -6,8 +6,8 @@ using ExcelClone.Resources.Localization;
 
 namespace ExcelClone.Views;
 
-public partial class HelpPage : ContentPage {
-
+public partial class HelpPage : ContentPage 
+{
     public HelpPage()
     {
         InitializeComponent();

@@ -10,33 +10,25 @@ using ExcelClone.Components;
 using ExcelClone.Resources.Localization;
 using ExcelClone.Services;
 using ExcelClone.Utils;
+using ExcelClone.Services.GoogleDrive;
+using ExcelClone.Helpers;
 
 namespace ExcelClone.FileSystem;
 
-public static class TableFileService
+public class TableFileService
 {
-    public static async Task<string> Save(ICellStorageReader spreadsheet, string fileName = "result.table")
+    private readonly ITableDataFormatter _tableDataFormatter;
+
+    public TableFileService()
     {
-        StringBuilder result = new StringBuilder();
+        _tableDataFormatter = new TableDataFormatter();
+    }
 
-        int columns = spreadsheet.GetColumns();
-        int rows = spreadsheet.GetRows();
+    public async Task<string> SaveLocally(ICellStorageReader spreadsheet, string fileName = "result.table")
+    {
+        var content = _tableDataFormatter.ToTableFormat(spreadsheet);
 
-        // Write header
-        result.AppendLine($"{columns} {rows}");
-
-        int totalCells = columns * rows;
-        for (int i = 0; i < totalCells; i++)
-        {
-            int col = i / rows;
-            int row = i % rows;
-
-            string cellName = spreadsheet.GetCellName(col, row);
-            var formula = spreadsheet.GetCellFormula(cellName);
-            result.AppendLine(formula);
-        }
-
-        var fileSaverResult = await PickAndSaveFile(result.ToString(), fileName);
+        var fileSaverResult = await PickAndSaveFile(content, fileName);
         if (fileSaverResult.IsSuccessful)
         {
             return DataProcessor.FormatResource(
@@ -50,50 +42,58 @@ public static class TableFileService
         );
     }
 
-    public static Spreadsheet Load(string path, ICellNameService nameService)
+    public async Task<string> SaveToGoogleDrive(ICellStorageReader spreadsheet,
+        IGoogleDriveService googleDriveService, string fileName = "result.table")
     {
+        try
+        {
+            var content = _tableDataFormatter.ToTableFormat(spreadsheet);
+
+            var stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
+
+            var file = await googleDriveService.UploadOrReplaceFileAsync(fileName, stream, "text/plain");
+
+            return DataProcessor.FormatResource(
+                AppResources.FileSavedSuccessfully,
+                ("Path", $"Google Drive, {file.Name} (id: {file.Id})")
+            );
+        }
+        catch (Exception e)
+        {
+            return DataProcessor.FormatResource(
+                AppResources.FileSavingError,
+                ("Error", e.Message)
+            );
+        }
+    }
+
+    public Spreadsheet LoadFromPath(string path, ICellNameService nameService)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            throw new ArgumentException("Path cannot be null or empty", nameof(path));
+        if (!File.Exists(path))
+            throw new FileNotFoundException("File not found", path);
+
         using var reader = new StreamReader(path);
 
-        // Read header
-        string? header = reader.ReadLine();
-        if (header == null)
-        {
-            throw new InvalidDataException(DataProcessor.FormatResource(
-                AppResources.EmptyFile
-            ));
-        }
+        return _tableDataFormatter.FromTableFormat(reader, nameService);
+    }
 
-        var parts = header.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (parts.Length != 2 ||
-            !int.TryParse(parts[0], out int columns) ||
-            !int.TryParse(parts[1], out int rows))
-        {
-            throw new InvalidDataException(DataProcessor.FormatResource(
-                AppResources.InvalidFileHeader
-            ));
-        }
+    public Spreadsheet LoadFromContentString(string content, ICellNameService nameService)
+    {
+        using var reader = new StreamReader(
+            new MemoryStream(Encoding.UTF8.GetBytes(content))
+        );
 
-        var spreadsheet = new Spreadsheet(nameService);
-        spreadsheet.CreateNewCellStorage(columns, rows);
+        return _tableDataFormatter.FromTableFormat(reader, nameService);
+    }
 
-        // Read cell formulas
-        int i = 0;
-        string? line;
-        while ((line = reader.ReadLine()) != null)
-        {
-            int col = i / rows;
-            int row = i % rows;
-            string cellName = nameService.GetCellName(col, row);
+    public async Task<Spreadsheet> LoadFromGoogleDrive(string fileId,
+        IGoogleDriveService googleDriveService, ICellNameService nameService)
+    {
+        var content = await googleDriveService.DownloadFileAsync(fileId);
 
-            if (!string.IsNullOrEmpty(line))
-            {
-                spreadsheet.SetCellFormula(cellName, line);
-            }
-
-            i++;
-        }
-
-        return spreadsheet;
+        return LoadFromContentString(content, nameService);
     }
 
     public static async Task<(FileResult? result, string? errorMessage)> PickTable(string pickTitle)
@@ -118,7 +118,7 @@ public static class TableFileService
         try
         {
             var result = await FilePicker.Default.PickAsync(options);
-            
+
             return (result, "");
         }
         catch (Exception ex)
