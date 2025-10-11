@@ -386,7 +386,7 @@
     <comment/>
   </data>
   <data name="SignIn" xml:space="preserve">
-    <value>Авторизуватия</value>
+    <value>Авторизуватися</value>
     <comment/>
   </data>
   <data name="SignOut" xml:space="preserve">
