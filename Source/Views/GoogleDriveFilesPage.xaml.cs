@@ -119,6 +119,7 @@ public partial class GoogleDriveFilesPage : ContentPage
 
     private async void OnUpdateClicked(object sender, EventArgs e)
     {
+        GoogleDriveItemsContainer.Clear();
         await GenerateGoogleDriveFileObjects();
     }
 
