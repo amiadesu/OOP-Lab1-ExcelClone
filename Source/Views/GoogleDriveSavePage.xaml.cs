@@ -11,7 +11,9 @@ using System.Threading.Tasks;
 
 namespace ExcelClone.Views;
 
-public partial class GoogleDriveSavePage : ContentPage {
+public partial class GoogleDriveSavePage : ContentPage 
+{
+    readonly TableFileService _tableFileService = new();
     private readonly GoogleDriveService _googleDriveService = new();
     private bool _initialized = false;
     private readonly ICellStorage _cellStorage;
@@ -90,7 +92,7 @@ public partial class GoogleDriveSavePage : ContentPage {
     private async void OnSaveClicked(object sender, EventArgs e)
     {
         _fileName = FileNameEntry.Text;
-        var result = await TableFileService.SaveToGoogleDrive(_cellStorage, _googleDriveService, _fullFileName);
+        var result = await _tableFileService.SaveToGoogleDrive(_cellStorage, _googleDriveService, _fullFileName);
 
         await DisplayAlert(
             DataProcessor.FormatResource(

@@ -12,6 +12,7 @@ namespace ExcelClone.Views;
 
 public partial class GoogleDriveFilesPage : ContentPage
 {
+    readonly TableFileService _tableFileService = new();
     readonly GoogleDriveService _googleDriveService = new();
     readonly CellNameService _cellNameService = new();
     private bool _initialized = false;
@@ -61,7 +62,7 @@ public partial class GoogleDriveFilesPage : ContentPage
     {
         try
         {
-            var spreadsheet = await TableFileService.LoadFromGoogleDrive(fileId, _googleDriveService, _cellNameService);
+            var spreadsheet = await _tableFileService.LoadFromGoogleDrive(fileId, _googleDriveService, _cellNameService);
             await Shell.Current.Navigation.PushAsync(new SpreadsheetPage(spreadsheet, _cellNameService, fileName));
         }
         catch (Exception e)

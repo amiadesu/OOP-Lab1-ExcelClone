@@ -18,6 +18,7 @@ namespace ExcelClone.Views;
 
 public partial class SpreadsheetPage : ContentPage
 {
+    readonly TableFileService _tableFileService = new();
     private bool _isScrolling = false;
     private int _currentColumns = 0;
     private int _currentRows = 0;
@@ -60,10 +61,10 @@ public partial class SpreadsheetPage : ContentPage
         InitializeComponent();
 
         _cellNameService = new CellNameService();
-        
+
         try
         {
-            _spreadsheet = TableFileService.LoadFromPath(tablePath, _cellNameService);
+            _spreadsheet = _tableFileService.LoadFromPath(tablePath, _cellNameService);
         }
         catch (Exception e)
         {
@@ -139,7 +140,7 @@ public partial class SpreadsheetPage : ContentPage
 
     private async void OnSaveClicked(object sender, EventArgs e)
     {
-        string result = await TableFileService.Save(_spreadsheet, _fileName);
+        string result = await _tableFileService.SaveLocally(_spreadsheet, _fileName);
         await DisplayAlert(
             DataProcessor.FormatResource(
                 AppResources.SavingResult
